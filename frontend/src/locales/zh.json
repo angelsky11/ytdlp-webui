@@ -130,19 +130,27 @@
   },
   "about": {
     "title": "关于",
-    "description": "是一个使用 yt-dlp 从 YouTube 及其他平台下载视频的网页界面。",
+    "description": "是一个基于 yt-dlp 的现代化 Web 界面，用于从 YouTube 及其他平台下载视频。支持实时进度追踪、多语言界面，采用 React + Ant Design 构建的简洁响应式界面。",
     "features": "功能特性",
     "featuresList": [
-      "从 YouTube 和其他平台下载视频",
-      "提取音频（MP3）",
-      "通过 WebSocket 实时显示下载进度",
-      "下载历史管理",
-      "文件管理（下载、删除）"
+      "支持 YouTube、Bilibili、Twitch 等 1000+ 网站（yt-dlp 支持的全部站点）",
+      "仅音频模式 — 下载最佳音质并转换为 MP3（192kbps）",
+      "视频质量选择 — 下载前可选分辨率",
+      "WebSocket 实时推送下载进度（无需轮询）",
+      "多语言界面（中文 / English）",
+      "任务管理 — 查看、取消、重试和删除下载任务",
+      "文件管理 — 浏览已下载文件，支持缩略图预览",
+      "NFO 元数据生成 — 兼容 Emby/Jellyfin/Kodi",
+      "缩略图自动转换（WebP → JPG）",
+      "Cookies 支持 — 导入浏览器 Cookies 以访问受限内容",
+      "yt-dlp 版本管理 — 在稳定版和 Nightly 版之间切换"
     ],
     "techStack": "技术栈",
     "techList": [
-      "前端：React + TypeScript + Vite + Ant Design",
-      "后端：Python + FastAPI + yt-dlp"
+      "前端：React 19 + TypeScript + Vite 8 + Ant Design 6 + Zustand + React Router 7",
+      "后端：Python 3 + FastAPI + SQLAlchemy + yt-dlp + WebSocket",
+      "数据库：SQLite（本地存储，零配置）",
+      "部署：Docker / Docker Compose，支持 Windows、Linux 和 macOS"
     ],
     "version": "版本 {version}",
     "versionNumber": "0.0.1-alpha",

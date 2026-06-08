@@ -1,21 +1,23 @@
-import { Card, Typography, Space } from 'antd';
+import { Card, Typography, Space, Tag, Divider } from 'antd';
 import { GithubOutlined, SendOutlined } from '@ant-design/icons';
 import { useLocale } from '../i18n';
 
 const { Title, Text, Paragraph, Link } = Typography;
 
 export default function About() {
-  const { t } = useLocale();
-  const features = t('about.featuresList');
-  const tech = t('about.techList');
+  const { t, resolve } = useLocale();
+  const features = resolve('about.featuresList') as string[] | undefined;
+  const tech = resolve('about.techList') as string[] | undefined;
 
   return (
     <Card>
       <Title level={4}>{t('about.title')}</Title>
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
         <Paragraph>
           <Text strong>yt-dlp Web UI</Text> {t('about.description')}
         </Paragraph>
+
+        <Divider style={{ margin: '8px 0' }} />
 
         <Paragraph>
           <Text strong>{t('about.features')}:</Text>
@@ -29,14 +31,16 @@ export default function About() {
         <Paragraph>
           <Text strong>{t('about.techStack')}:</Text>
           <ul>
-            {(Array.isArray(tech) ? tech : []).map((t, i) => (
-              <li key={i}>{t}</li>
+            {(Array.isArray(tech) ? tech : []).map((item, i) => (
+              <li key={i}>{item}</li>
             ))}
           </ul>
         </Paragraph>
 
+        <Divider style={{ margin: '8px 0' }} />
+
         <Paragraph>
-          <Space size="middle">
+          <Space size="middle" wrap>
             <Link href={t('about.githubLink')} target="_blank">
               <GithubOutlined /> {t('about.github')}
             </Link>
@@ -47,7 +51,7 @@ export default function About() {
         </Paragraph>
 
         <Paragraph>
-          <Text type="secondary">{t('about.version', { version: t('about.versionNumber') })}</Text>
+          <Tag color="blue">{t('about.version', { version: t('about.versionNumber') })}</Tag>
         </Paragraph>
       </Space>
     </Card>

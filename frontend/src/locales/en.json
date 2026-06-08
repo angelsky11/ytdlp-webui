@@ -131,19 +131,27 @@
   },
   "about": {
     "title": "About",
-    "description": "is a web interface for downloading videos from YouTube and other platforms using yt-dlp.",
+    "description": "is a modern web interface for downloading videos from YouTube and other platforms using yt-dlp. It provides real-time progress tracking, multi-language support, and a clean responsive UI built with React and Ant Design.",
     "features": "Features",
     "featuresList": [
-      "Download videos from YouTube and other platforms",
-      "Extract audio only (MP3)",
-      "Real-time download progress via WebSocket",
-      "Download history management",
-      "File management (download, delete)"
+      "Download videos from YouTube, Bilibili, Twitch and 1000+ sites supported by yt-dlp",
+      "Audio-only mode — downloads best quality audio and converts to MP3 (192kbps)",
+      "Video quality selection — choose from available resolutions before downloading",
+      "Real-time download progress via WebSocket (no polling)",
+      "Multi-language interface (English / 中文)",
+      "Task management — view, cancel, retry, and delete download tasks",
+      "File management — browse downloaded files with thumbnail previews",
+      "NFO metadata generation — Emby/Jellyfin/Kodi compatible .nfo files",
+      "Automatic thumbnail conversion (WebP → JPG)",
+      "Cookies support — import browser cookies for age-restricted content",
+      "yt-dlp version management — switch between stable and nightly builds"
     ],
     "techStack": "Tech Stack",
     "techList": [
-      "Frontend: React + TypeScript + Vite + Ant Design",
-      "Backend: Python + FastAPI + yt-dlp"
+      "Frontend: React 19 + TypeScript + Vite 8 + Ant Design 6 + Zustand + React Router 7",
+      "Backend: Python 3 + FastAPI + SQLAlchemy + yt-dlp + WebSocket",
+      "Database: SQLite (local, zero-configuration)",
+      "Deployment: Docker / Docker Compose, supports Windows, Linux and macOS"
     ],
     "version": "Version {version}",
     "versionNumber": "0.0.1-alpha",

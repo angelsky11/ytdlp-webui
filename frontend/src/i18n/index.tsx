@@ -17,12 +17,14 @@ interface I18nContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
+  resolve: (key: string) => TranslationValue | undefined;
 }
 
 const I18nContext = createContext<I18nContextType>({
   locale: 'en',
   setLocale: () => {},
   t: (key: string) => key,
+  resolve: () => undefined,
 });
 
 function resolveValue(obj: Translations, path: string): TranslationValue | undefined {
@@ -78,6 +80,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     return key;
   }, [translations]);
 
+  const resolve = useCallback((key: string): TranslationValue | undefined => {
+    return resolveValue(translations, key) || resolveValue(LOCALE_MAP.en, key);
+  }, [translations]);
+
   // Restore locale from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('locale') as Locale | null;
@@ -88,7 +94,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={{ locale, setLocale, t, resolve }}>
       {children}
     </I18nContext.Provider>
   );
