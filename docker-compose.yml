@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   ytdlp-webui:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: angelsky11/ytdlp-webui:latest
     ports:
       - "58888:58888"
     volumes:
