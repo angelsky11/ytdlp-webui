@@ -30,8 +30,8 @@ interface GroupedFile {
 
 /** Normalize video ID pattern from filename like "Title [videoID].ext" */
 function normalizeDisplayName(filename: string): string {
-  // Remove extension
-  let name = filename.replace(/\.(info\.)?json$|\.(mp4|mkv|webm|avi|mov|flv|webp|jpg|jpeg|png)$/i, '');
+  // Remove extension (include both video and audio)
+  let name = filename.replace(/\.(info\.)?json$|\.(mp4|mkv|webm|avi|mov|flv|mp3|m4a|ogg|wav|webp|jpg|jpeg|png)$/i, '');
   // Remove video ID bracket suffix like [abc123]
   name = name.replace(/\s*\[[\w-]+\]$/, '');
   return name.trim();
@@ -57,7 +57,8 @@ function getFileCategory(filename: string): 'video' | 'thumbnail' | 'json' | 'ot
   const lower = filename.toLowerCase();
   if (lower.endsWith('.info.json')) return 'json';
   if (lower.endsWith('.json')) return 'json';
-  if (lower.match(/\.(mp4|mkv|webm|avi|mov|flv)$/)) return 'video';
+  // Include both video and audio extensions
+  if (lower.match(/\.(mp4|mkv|webm|avi|mov|flv|mp3|m4a|ogg|wav)$/)) return 'video';
   if (lower.match(/\.(webp|jpg|jpeg|png)$/)) return 'thumbnail';
   return 'other';
 }
