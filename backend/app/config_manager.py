@@ -168,16 +168,32 @@ def get_ffmpeg_path():
 
 
 def ffmpeg_installed() -> bool:
-    """Check if ffmpeg is installed"""
+    """Check if ffmpeg is installed and working"""
+    from app.logger import app_logger
+    
     ffmpeg_path = get_ffmpeg_path()
-    if os.path.exists(ffmpeg_path):
-        return True
-    # Also check if ffmpeg is in PATH
+    
+    # First check system ffmpeg in PATH
     try:
-        subprocess.run([get_ffmpeg_path(), "-version"], capture_output=True, check=True)
-        return True
+        result = subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
+        if result.returncode == 0:
+            return True
     except Exception:
-        return False
+        pass
+    
+    # Then check local ffmpeg installation
+    if os.path.exists(ffmpeg_path):
+        try:
+            result = subprocess.run([ffmpeg_path, "-version"], capture_output=True, check=True)
+            if result.returncode == 0:
+                return True
+        except Exception:
+            # ffmpeg exists but can't run (e.g., wrong architecture)
+            # Remove broken installation so it can be re-downloaded
+            app_logger.warning(f"ffmpeg exists but not executable, removing: {ffmpeg_path}")
+            os.remove(ffmpeg_path)
+    
+    return False
 
 
 def download_ffmpeg() -> dict:
