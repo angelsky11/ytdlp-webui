@@ -73,7 +73,13 @@ chmod +x start.sh
 
 ### Docker
 
+**Docker Hub:** [angelsky11/ytdlp-webui](https://hub.docker.com/r/angelsky11/ytdlp-webui)
+
 ```bash
+# 使用 Docker Hub 镜像（推荐）
+docker run -d -p 58888:58888 -v ./downloads:/downloads -v ./config:/config angelsky11/ytdlp-webui:latest
+
+# 或使用 docker-compose
 docker compose up -d
 ```
 
