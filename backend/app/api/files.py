@@ -59,10 +59,11 @@ async def delete_file(filename: str):
     
     # 根据文件类型决定删除策略
     ext = Path(filename).suffix.lower()
-    video_exts = ('.mp4', '.mkv', '.webm', '.avi', '.mov', '.flv')
+    # 视频和音频文件都需要删除同组文件
+    media_exts = ('.mp4', '.mkv', '.webm', '.avi', '.mov', '.flv', '.mp3', '.m4a', '.ogg', '.wav')
     
-    if ext in video_exts:
-        # 视频文件：删除同组所有文件（缩略图、info.json、nfo 等）
+    if ext in media_exts:
+        # 媒体文件：删除同组所有文件（缩略图、info.json、nfo 等）
         group_key = get_file_group_key(filename)
         deleted_files = []
         for f in DOWNLOAD_DIR.iterdir():
@@ -77,7 +78,7 @@ async def delete_file(filename: str):
                 remove_downloaded_file_from_db(f.name)
         return {"message": "File deleted", "deleted": deleted_files}
     else:
-        # 非视频文件：只删自身
+        # 非媒体文件：只删自身
         file_path.unlink()
         remove_downloaded_file_from_db(filename)
         return {"message": "File deleted", "deleted": [filename]}
