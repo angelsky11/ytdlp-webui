@@ -20,6 +20,9 @@ export interface DownloadProgress {
   eta?: string;
   error?: string;
   created_at?: number;
+  format?: string;
+  audio_only?: boolean;
+  output_template?: string;
 }
 
 export interface FileInfo {

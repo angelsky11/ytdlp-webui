@@ -4,8 +4,11 @@ import urllib.request
 import zipfile
 import tarfile
 import platform
+import logging
 from typing import Optional, Callable, Dict, Any
-from app.logger import app_logger
+
+# 使用标准 logging 模块避免循环导入
+logger = logging.getLogger(__name__)
 
 
 def download_file(url: str, target_path: str) -> bool:
@@ -20,12 +23,12 @@ def download_file(url: str, target_path: str) -> bool:
         是否下载成功
     """
     try:
-        app_logger.info(f"Downloading from {url} to {target_path}")
+        logger.info(f"Downloading from {url} to {target_path}")
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         urllib.request.urlretrieve(url, target_path)
         return True
     except Exception as e:
-        app_logger.error(f"Failed to download {url}: {e}")
+        logger.error(f"Failed to download {url}: {e}")
         return False
 
 
@@ -48,7 +51,7 @@ def download_and_extract_zip(url: str, extract_dir: str,
         os.makedirs(extract_dir, exist_ok=True)
         zip_path = os.path.join(extract_dir, "download.zip")
         
-        app_logger.info(f"Downloading ZIP from {url}...")
+        logger.info(f"Downloading ZIP from {url}...")
         urllib.request.urlretrieve(url, zip_path)
         
         with zipfile.ZipFile(zip_path, 'r') as zf:
@@ -69,7 +72,7 @@ def download_and_extract_zip(url: str, extract_dir: str,
         os.remove(zip_path)
         return True
     except Exception as e:
-        app_logger.error(f"Failed to download and extract ZIP {url}: {e}")
+        logger.error(f"Failed to download and extract ZIP {url}: {e}")
         return False
 
 
@@ -92,7 +95,7 @@ def download_and_extract_tarxz(url: str, extract_dir: str,
         os.makedirs(extract_dir, exist_ok=True)
         tar_path = os.path.join(extract_dir, "download.tar.xz")
         
-        app_logger.info(f"Downloading tar.xz from {url}...")
+        logger.info(f"Downloading tar.xz from {url}...")
         urllib.request.urlretrieve(url, tar_path)
         
         with tarfile.open(tar_path, 'r:xz') as tf:
@@ -114,7 +117,7 @@ def download_and_extract_tarxz(url: str, extract_dir: str,
         os.remove(tar_path)
         return True
     except Exception as e:
-        app_logger.error(f"Failed to download and extract tar.xz {url}: {e}")
+        logger.error(f"Failed to download and extract tar.xz {url}: {e}")
         return False
 
 
@@ -143,8 +146,8 @@ def download_executable(url: str, target_path: str, make_exec: bool = True) -> D
         if make_exec and platform.system() != "Windows":
             os.chmod(target_path, 0o755)
         
-        app_logger.info(f"Downloaded executable to: {target_path}")
+        logger.info(f"Downloaded executable to: {target_path}")
         return {"success": True, "path": target_path}
     except Exception as e:
-        app_logger.error(f"Failed to download executable {url}: {e}")
+        logger.error(f"Failed to download executable {url}: {e}")
         return {"success": False, "error": str(e)}
