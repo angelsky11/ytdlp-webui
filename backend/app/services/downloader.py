@@ -684,12 +684,22 @@ class DownloadManager:
                 for line in output_lines[-20:]:
                     app_logger.error(f"  {line}")
                 app_logger.error(f"="*60)
+                
+                # Clean up partially downloaded files
+                if task.filename:
+                    app_logger.info(f"Task {task_id}: Cleaning up partially downloaded files...")
+                    self._delete_associated_files(task.filename)
 
         except Exception as e:
             task.status = DownloadStatus.FAILED
             task.error = str(e)
             app_logger.exception(f"Task {task_id}: Exception occurred during download")
             app_logger.error(f"Task {task_id}: Exception details: {e}")
+            
+            # Clean up partially downloaded files
+            if task.filename:
+                app_logger.info(f"Task {task_id}: Cleaning up partially downloaded files due to exception...")
+                self._delete_associated_files(task.filename)
 
         self._save_task_to_db(task)
         await self.notify_progress(task)
@@ -717,6 +727,52 @@ class DownloadManager:
             return True
         app_logger.warn(f"cancel_task({task_id}): Task not found or not in downloading state")
         return False
+
+    def restart_task(self, task_id: str) -> bool:
+        """重新启动已失败/已取消的任务"""
+        app_logger.info(f"restart_task({task_id}): Starting...")
+        try:
+            # 从数据库获取任务信息
+            db = next(get_db())
+            db_task = db.query(DownloadTaskModel).filter(DownloadTaskModel.id == task_id).first()
+            
+            if not db_task:
+                app_logger.error(f"restart_task({task_id}): Task not found in database")
+                return False
+            
+            # 检查任务状态是否允许重启
+            if db_task.status not in [DownloadStatus.FAILED.value, DownloadStatus.CANCELLED.value]:
+                app_logger.error(f"restart_task({task_id}): Task is not in failed or cancelled state")
+                return False
+            
+            # 删除之前下载的文件
+            if db_task.filename:
+                self._delete_associated_files(db_task.filename)
+                app_logger.info(f"restart_task({task_id}): Deleted previous files")
+            
+            # 创建新的任务实例
+            options = {
+                'format': db_task.format,
+                'output_template': db_task.output_template,
+                'audio_only': db_task.audio_only,
+                'video_format_id': None  # 暂时不支持视频格式ID
+            }
+            
+            new_task = DownloadTask(task_id, db_task.url, options, db_task.title)
+            new_task.status = DownloadStatus.PENDING
+            new_task.filename = None
+            new_task.progress = 0.0
+            new_task.error = None
+            
+            # 保存到内存和数据库
+            self.tasks[task_id] = new_task
+            self._save_task_to_db(new_task)
+            
+            app_logger.info(f"restart_task({task_id}): Task restarted successfully")
+            return True
+        except Exception as e:
+            app_logger.error(f"restart_task({task_id}): Failed - {e}")
+            return False
 
     def remove_task(self, task_id: str) -> bool:
         """从内存、数据库和磁盘中删除任务记录及关联文件"""

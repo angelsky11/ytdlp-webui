@@ -80,6 +80,25 @@ async def remove_download(task_id: str):
     return {"message": "Task removed"}
 
 
+@router.post("/{task_id}/restart")
+async def restart_download(task_id: str, background_tasks: BackgroundTasks):
+    """重新启动已失败/已取消的任务"""
+    app_logger.info(f"API: POST /downloads/{task_id}/restart")
+    
+    # 检查并重启任务
+    if not download_manager.restart_task(task_id):
+        app_logger.warn(f"Failed to restart task {task_id}")
+        raise HTTPException(status_code=400, detail="Failed to restart task")
+    
+    # 添加到后台任务队列
+    background_tasks.add_task(download_manager.start_download, task_id)
+    app_logger.info(f"Restart task scheduled for background execution")
+    
+    task = download_manager.get_task(task_id)
+    progress = task.to_progress() if task else None
+    return progress
+
+
 @router.get("/history", response_model=list[DownloadProgress])
 async def list_download_history():
     """获取下载历史记录"""

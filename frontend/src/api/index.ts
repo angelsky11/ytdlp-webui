@@ -86,6 +86,24 @@ export async function removeDownload(taskId: string): Promise<void> {
   if (!response.ok) throw new Error('Failed to remove download');
 }
 
+export async function restartDownload(taskId: string): Promise<DownloadProgress> {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return {
+      task_id: taskId,
+      status: DownloadStatus.PENDING,
+      filename: 'Mock Video.mp4',
+      title: 'Mock Video',
+      progress: 0,
+      created_at: Date.now() / 1000,
+    };
+  }
+  
+  const response = await fetch(`${API_BASE}/downloads/${taskId}/restart`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to restart download');
+  return response.json();
+}
+
 export async function getVideoInfo(request: DownloadRequest): Promise<VideoInfo> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 500));

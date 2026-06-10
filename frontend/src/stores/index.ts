@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { DownloadProgress, FileInfo } from '../types';
-import { listDownloads, listFiles, cancelDownload, removeDownload as removeDownloadApi, deleteFile as deleteFileApi, getConfig, updateConfig as updateConfigApi, updateYtdlp as updateYtdlpApi, getCookiesFiles, uploadCookies, deleteCookies, createDownload } from '../api';
+import { listDownloads, listFiles, cancelDownload, removeDownload as removeDownloadApi, deleteFile as deleteFileApi, getConfig, updateConfig as updateConfigApi, updateYtdlp as updateYtdlpApi, getCookiesFiles, uploadCookies, deleteCookies, restartDownload } from '../api';
 
 interface CookiesFile {
   name: string;
@@ -256,14 +256,7 @@ export const useStore = create<StoreState>((set, get) => ({
 
   retryDownload: async (task) => {
     try {
-      const request = {
-        url: task.url || '',
-        format: task.format || 'best',
-        audio_only: task.audio_only || false,
-        output_template: task.output_template || '%(title)s.%(ext)s',
-        title: task.title
-      };
-      await createDownload(request);
+      await restartDownload(task.task_id);
       get().fetchDownloads();
     } catch (error) {
       console.error('Failed to retry download:', error);
