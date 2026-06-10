@@ -540,7 +540,13 @@ class DownloadManager:
                     args.extend(['-f', 'bestvideo+bestaudio[ext=m4a]/best'])
                     app_logger.info(f"Task {task_id}: No specific format selected, using bestvideo+bestaudio[ext=m4a]/best")
                 
+                # Validate container format - --merge-output-format only accepts specific formats
+                # Not 'best', 'worst', etc.
                 container_format = task.options.get('format', 'mp4')
+                # Valid container formats for --merge-output-format
+                valid_formats = ['mp4', 'mkv', 'webm', 'flv', 'avi', 'mov', 'm4a']
+                if container_format not in valid_formats:
+                    container_format = 'mp4'  # Default to mp4 if invalid
                 args.extend(['--merge-output-format', container_format])
                 app_logger.info(f"Task {task_id}: Container format: {container_format}")
             
