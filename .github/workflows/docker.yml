@@ -31,7 +31,6 @@ jobs:
           images: angelsky11/ytdlp-webui
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=0.0.1-alpha
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha,format=short
