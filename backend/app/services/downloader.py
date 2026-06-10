@@ -2,6 +2,7 @@ import asyncio
 import json
 import locale
 import os
+import re
 import subprocess
 import uuid
 from pathlib import Path
