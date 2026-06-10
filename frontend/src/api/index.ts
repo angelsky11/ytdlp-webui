@@ -150,7 +150,7 @@ export async function updateConfig(config: UpdateConfigRequest): Promise<AppConf
         ytdlp_version: config.ytdlp_version || 'stable', 
         ytdlp_current_version: '2024.01.01',
         cookies_enabled: config.cookies_enabled ?? false,
-        log_level: config.log_level || 'info',
+        log_level: (config.log_level as 'debug' | 'verbose' | 'info' | 'warn' | 'error') || 'info',
         language: config.language || 'en'
       };
   }
