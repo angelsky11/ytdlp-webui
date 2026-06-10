@@ -83,8 +83,8 @@ async def health():
 
 
 # Frontend static files path - use absolute path from app root
-APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FRONTEND_DIST = os.path.join(APP_DIR, "frontend", "dist")
+from app.config import BASE_DIR
+FRONTEND_DIST = os.path.join(str(BASE_DIR), "frontend", "dist")
 
 
 # Mount assets directory for JS/CSS files

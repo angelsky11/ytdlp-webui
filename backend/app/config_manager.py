@@ -5,6 +5,7 @@ import platform
 from typing import Optional, List
 from pydantic import BaseModel
 from app.config import CONFIG_DIR, DOWNLOAD_DIR
+from app.utils.download import download_executable, download_and_extract_zip, download_and_extract_tarxz
 
 class AppConfig(BaseModel):
     default_format: str = "mp4"
@@ -103,8 +104,6 @@ def get_ytdlp_current_version() -> str:
 
 def download_ytdlp() -> dict:
     """Download yt-dlp executable to the configured version"""
-    import urllib.request
-    
     version = get_ytdlp_version()
     system = platform.system()
     
@@ -120,29 +119,16 @@ def download_ytdlp() -> dict:
             url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
     
     ytdlp_path = get_ytdlp_path()
-    ytdlp_dir = get_ytdlp_dir()
+    result = download_executable(url, ytdlp_path)
     
-    try:
-        os.makedirs(ytdlp_dir, exist_ok=True)
-        urllib.request.urlretrieve(url, ytdlp_path)
-        
-        if system != "Windows":
-            os.chmod(ytdlp_path, 0o755)
-        
+    if result["success"]:
         new_version = get_ytdlp_current_version()
-        
-        return {
-            "success": True,
+        result.update({
             "version": new_version,
-            "type": version,
-            "path": ytdlp_path
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
             "type": version
-        }
+        })
+    
+    return result
 
 def ensure_ytdlp_installed() -> bool:
     """Ensure yt-dlp is installed, download if not"""
@@ -198,7 +184,6 @@ def ffmpeg_installed() -> bool:
 
 def download_ffmpeg() -> dict:
     """Download ffmpeg to config directory"""
-    import urllib.request
     from app.logger import app_logger
     
     ffmpeg_dir = get_ffmpeg_dir()
@@ -210,45 +195,25 @@ def download_ffmpeg() -> dict:
         if system == "Windows":
             # Download ffmpeg Windows build from BtbN
             url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
-            import zipfile
-            zip_path = os.path.join(ffmpeg_dir, "ffmpeg.zip")
-            app_logger.info(f"Downloading ffmpeg from {url}...")
-            urllib.request.urlretrieve(url, zip_path)
-            
-            # Extract ffmpeg.exe from zip
-            with zipfile.ZipFile(zip_path, 'r') as zf:
-                for member in zf.namelist():
-                    if member.endswith('ffmpeg.exe'):
-                        zf.extract(member, ffmpeg_dir)
-                        extracted_path = os.path.join(ffmpeg_dir, member)
-                        target_path = os.path.join(ffmpeg_dir, 'ffmpeg.exe')
-                        os.rename(extracted_path, target_path)
-                        break
-            
-            os.remove(zip_path)
+            success = download_and_extract_zip(
+                url, ffmpeg_dir, 
+                target_filename="ffmpeg.exe",
+                filter_func=lambda x: x.endswith('ffmpeg.exe')
+            )
         else:
             # Linux/macOS - download static build
             url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
-            app_logger.info(f"Downloading ffmpeg from {url}...")
-            import tarfile
-            tar_path = os.path.join(ffmpeg_dir, "ffmpeg.tar.xz")
-            urllib.request.urlretrieve(url, tar_path)
-            
-            with tarfile.open(tar_path, 'r:xz') as tf:
-                for member in tf.getmembers():
-                    if 'ffmpeg' in member.name and '/' not in member.name.replace('ffmpeg', ''):
-                        tf.extract(member, ffmpeg_dir)
-                        extracted_path = os.path.join(ffmpeg_dir, member.name)
-                        target_path = os.path.join(ffmpeg_dir, 'ffmpeg')
-                        if os.path.exists(extracted_path):
-                            os.rename(extracted_path, target_path)
-                            break
-            
-            os.remove(tar_path)
-            os.chmod(get_ffmpeg_path(), 0o755)
+            success = download_and_extract_tarxz(
+                url, ffmpeg_dir,
+                target_filename="ffmpeg",
+                filter_func=lambda x: 'ffmpeg' in x and '/' not in x.replace('ffmpeg', '')
+            )
         
-        app_logger.info(f"ffmpeg installed at: {get_ffmpeg_path()}")
-        return {"success": True, "path": get_ffmpeg_path()}
+        if success:
+            app_logger.info(f"ffmpeg installed at: {get_ffmpeg_path()}")
+            return {"success": True, "path": get_ffmpeg_path()}
+        else:
+            return {"success": False, "error": "Download or extraction failed"}
     except Exception as e:
         app_logger.error(f"Failed to download ffmpeg: {e}")
         return {"success": False, "error": str(e)}
@@ -293,7 +258,7 @@ def deno_installed() -> bool:
 
 def download_deno() -> dict:
     """Download deno to config directory"""
-    import urllib.request
+    from app.logger import app_logger
     
     deno_dir = get_deno_dir()
     system = platform.system()
@@ -301,49 +266,21 @@ def download_deno() -> dict:
     try:
         if system == "Windows":
             url = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip"
-            import zipfile
-            zip_path = os.path.join(deno_dir, "deno.zip")
-            from app.logger import app_logger
-            app_logger.info(f"Downloading Deno from {url}...")
-            urllib.request.urlretrieve(url, zip_path)
-            
-            with zipfile.ZipFile(zip_path, 'r') as zf:
-                zf.extract("deno.exe", deno_dir)
-            
-            os.remove(zip_path)
+            success = download_and_extract_zip(url, deno_dir)
         elif system == "Darwin":
             url = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-apple-darwin.zip"
-            import zipfile
-            zip_path = os.path.join(deno_dir, "deno.zip")
-            from app.logger import app_logger
-            app_logger.info(f"Downloading Deno from {url}...")
-            urllib.request.urlretrieve(url, zip_path)
-            
-            with zipfile.ZipFile(zip_path, 'r') as zf:
-                zf.extract("deno", deno_dir)
-            
-            os.remove(zip_path)
-            os.chmod(get_deno_path(), 0o755)
+            success = download_and_extract_zip(url, deno_dir)
         else:
             # Linux
             url = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip"
-            import zipfile
-            zip_path = os.path.join(deno_dir, "deno.zip")
-            from app.logger import app_logger
-            app_logger.info(f"Downloading Deno from {url}...")
-            urllib.request.urlretrieve(url, zip_path)
-            
-            with zipfile.ZipFile(zip_path, 'r') as zf:
-                zf.extract("deno", deno_dir)
-            
-            os.remove(zip_path)
-            os.chmod(get_deno_path(), 0o755)
+            success = download_and_extract_zip(url, deno_dir)
         
-        from app.logger import app_logger
-        app_logger.info(f"Deno installed at: {get_deno_path()}")
-        return {"success": True, "path": get_deno_path()}
+        if success:
+            app_logger.info(f"Deno installed at: {get_deno_path()}")
+            return {"success": True, "path": get_deno_path()}
+        else:
+            return {"success": False, "error": "Download or extraction failed"}
     except Exception as e:
-        from app.logger import app_logger
         app_logger.error(f"Failed to download Deno: {e}")
         return {"success": False, "error": str(e)}
 

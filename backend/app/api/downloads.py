@@ -7,7 +7,6 @@ from app.models.schemas import DownloadRequest, DownloadProgress, VideoInfo, Vid
 from app.services.downloader import download_manager, get_ytdlp_env
 from app.config_manager import get_ytdlp_path, get_cookies_path_for_url, ensure_deno_installed
 from app.logger import app_logger
-import yt_dlp
 
 router = APIRouter(prefix="/downloads", tags=["downloads"])
 

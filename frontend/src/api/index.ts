@@ -2,8 +2,25 @@ import type { DownloadRequest, DownloadProgress, FileInfo, VideoInfo } from '../
 import { DownloadStatus } from '../types';
 import { mockDownloads, mockFiles, mockVideoInfo } from './mock';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:58888';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
+export interface AppConfig {
+  default_format: string;
+  ytdlp_version: string;
+  ytdlp_current_version: string;
+  cookies_enabled: boolean;
+  log_level: 'debug' | 'verbose' | 'info' | 'warn' | 'error';
+  language: string;
+}
+
+export interface UpdateConfigRequest {
+  default_format?: string;
+  ytdlp_version?: string;
+  cookies_enabled?: boolean;
+  log_level?: string;
+  language?: string;
+}
 
 export async function createDownload(request: DownloadRequest): Promise<DownloadProgress> {
   if (USE_MOCK) {
@@ -114,7 +131,7 @@ export async function deleteFile(filename: string): Promise<void> {
   if (!response.ok) throw new Error('Failed to delete file');
 }
 
-export async function getConfig(): Promise<{ default_format: string; ytdlp_version: string; ytdlp_current_version: string; cookies_enabled: boolean; log_level: 'debug' | 'verbose' | 'info' | 'warn' | 'error'; language: string }> {
+export async function getConfig(): Promise<AppConfig> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 100));
     return { default_format: 'mp4', ytdlp_version: 'stable', ytdlp_current_version: '2024.01.01', cookies_enabled: false, log_level: 'info', language: 'en' };
@@ -125,7 +142,7 @@ export async function getConfig(): Promise<{ default_format: string; ytdlp_versi
   return response.json();
 }
 
-export async function updateConfig(config: { default_format?: string; ytdlp_version?: string; cookies_enabled?: boolean; log_level?: string; language?: string }): Promise<{ default_format: string; ytdlp_version: string; ytdlp_current_version: string; cookies_enabled: boolean; log_level: string; language: string }> {
+export async function updateConfig(config: UpdateConfigRequest): Promise<AppConfig> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 100));
     return { 

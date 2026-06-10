@@ -43,7 +43,6 @@ def get_file_group_key(filename: str) -> str:
         if dot_idx > 0:
             base = base[:dot_idx]
     # 去除视频 ID 后缀 [xxx]
-    import re
     base = re.sub(r'\s*\[[\w-]+\]$', '', base)
     return base
 
@@ -504,7 +503,6 @@ class DownloadManager:
             app_logger.info(f"Task {task_id}: yt-dlp path: {ytdlp_path}")
             
             # 检查 yt-dlp 文件是否存在
-            import os
             if not os.path.exists(ytdlp_path):
                 app_logger.error(f"Task {task_id}: yt-dlp executable not found at {ytdlp_path}")
                 task.status = DownloadStatus.FAILED

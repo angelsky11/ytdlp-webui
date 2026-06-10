@@ -48,6 +48,13 @@ interface StoreState {
   deleteFile: (filename: string) => Promise<void>;
 }
 
+function checkHasPendingChanges(state: StoreState): boolean {
+  return state.pendingFormat !== state.defaultFormat ||
+         state.pendingYtdlpVersion !== state.ytdlpVersion ||
+         state.pendingCookiesEnabled !== state.cookiesEnabled ||
+         state.pendingLogLevel !== state.logLevel;
+}
+
 export const useStore = create<StoreState>((set, get) => ({
   downloads: [],
   files: [],
@@ -116,37 +123,31 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   setPendingFormat: (format) => {
-    const current = get();
-    const hasChanges = format !== current.defaultFormat || 
-                       current.pendingYtdlpVersion !== current.ytdlpVersion ||
-                       current.pendingCookiesEnabled !== current.cookiesEnabled;
-    set({ pendingFormat: format, hasPendingChanges: hasChanges });
+    set(state => ({ 
+      pendingFormat: format, 
+      hasPendingChanges: checkHasPendingChanges({ ...state, pendingFormat: format }) 
+    }));
   },
 
   setPendingYtdlpVersion: (version) => {
-    const current = get();
-    const hasChanges = current.pendingFormat !== current.defaultFormat || 
-                       version !== current.ytdlpVersion ||
-                       current.pendingCookiesEnabled !== current.cookiesEnabled;
-    set({ pendingYtdlpVersion: version, hasPendingChanges: hasChanges });
+    set(state => ({ 
+      pendingYtdlpVersion: version, 
+      hasPendingChanges: checkHasPendingChanges({ ...state, pendingYtdlpVersion: version }) 
+    }));
   },
 
   setPendingCookiesEnabled: (enabled) => {
-    const current = get();
-    const hasChanges = current.pendingFormat !== current.defaultFormat || 
-                       current.pendingYtdlpVersion !== current.ytdlpVersion ||
-                       enabled !== current.cookiesEnabled ||
-                       current.pendingLogLevel !== current.logLevel;
-    set({ pendingCookiesEnabled: enabled, hasPendingChanges: hasChanges });
+    set(state => ({ 
+      pendingCookiesEnabled: enabled, 
+      hasPendingChanges: checkHasPendingChanges({ ...state, pendingCookiesEnabled: enabled }) 
+    }));
   },
 
   setPendingLogLevel: (level) => {
-    const current = get();
-    const hasChanges = current.pendingFormat !== current.defaultFormat || 
-                       current.pendingYtdlpVersion !== current.ytdlpVersion ||
-                       current.pendingCookiesEnabled !== current.cookiesEnabled ||
-                       level !== current.logLevel;
-    set({ pendingLogLevel: level, hasPendingChanges: hasChanges });
+    set(state => ({ 
+      pendingLogLevel: level, 
+      hasPendingChanges: checkHasPendingChanges({ ...state, pendingLogLevel: level }) 
+    }));
   },
 
   saveConfig: async () => {
@@ -257,9 +258,10 @@ export const useStore = create<StoreState>((set, get) => ({
     try {
       const request = {
         url: task.url || '',
-        format: 'best',
-        audio_only: false,
-        output_template: '%(title)s.%(ext)s'
+        format: task.format || 'best',
+        audio_only: task.audio_only || false,
+        output_template: task.output_template || '%(title)s.%(ext)s',
+        title: task.title
       };
       await createDownload(request);
       get().fetchDownloads();
