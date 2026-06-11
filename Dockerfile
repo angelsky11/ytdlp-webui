@@ -23,4 +23,6 @@ RUN mkdir -p /downloads /config
 
 ENV PYTHONPATH=/app
 
+EXPOSE 58888
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "58888"]

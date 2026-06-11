@@ -4,6 +4,8 @@ import { useLocale } from '../i18n';
 
 const { Title, Text, Paragraph, Link } = Typography;
 
+declare const __APP_VERSION__: string;
+
 export default function About() {
   const { t, resolve } = useLocale();
   const features = resolve('about.featuresList') as string[] | undefined;
@@ -51,7 +53,7 @@ export default function About() {
         </Paragraph>
 
         <Paragraph>
-          <Tag color="blue">{t('about.version', { version: t('about.versionNumber') })}</Tag>
+          <Tag color="blue">{t('about.version', { version: __APP_VERSION__ })}</Tag>
         </Paragraph>
       </Space>
     </Card>
