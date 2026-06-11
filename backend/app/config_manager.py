@@ -6,6 +6,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 from app.config import CONFIG_DIR, DOWNLOAD_DIR
 from app.utils.download import download_executable, download_and_extract_zip, download_and_extract_tarxz
+from app.logger import app_logger
 
 class AppConfig(BaseModel):
     default_format: str = "mp4"
@@ -55,9 +56,16 @@ def load_config() -> AppConfig:
 
 def save_config(config: AppConfig) -> None:
     """Save configuration to file"""
-    os.makedirs(CONFIG_DIR, exist_ok=True)
-    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-        json.dump(config.model_dump(), f, indent=2)
+    try:
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(config.model_dump(), f, indent=2)
+        app_logger.info(f"Config saved successfully to {CONFIG_FILE}")
+    except Exception as e:
+        app_logger.error(f"Failed to save config: {e}")
+        app_logger.error(f"CONFIG_DIR: {CONFIG_DIR}")
+        app_logger.error(f"CONFIG_FILE: {CONFIG_FILE}")
+        raise
 
 def get_default_format() -> str:
     """Get default video format"""

@@ -6,6 +6,7 @@ from app.config_manager import (
     load_config, get_ytdlp_current_version, download_ytdlp,
     save_cookies, delete_cookies, get_cookies_files
 )
+from app.logger import app_logger
 
 router = APIRouter()
 
@@ -58,59 +59,83 @@ async def get_config():
 @router.put("/config", response_model=ConfigResponse)
 async def update_config(config_update: ConfigUpdate):
     """Update configuration"""
-    config = load_config()
+    app_logger.info("="*60)
+    app_logger.info("API: PUT /config")
+    app_logger.info(f"Config update request: {config_update}")
+    app_logger.info("="*60)
     
-    has_changes = False
-    
-    if config_update.default_format is not None:
-        if config_update.default_format not in ["mp4", "mkv"]:
-            raise HTTPException(status_code=400, detail="Format must be mp4 or mkv")
-        if config_update.default_format != config.default_format:
-            config.default_format = config_update.default_format
-            has_changes = True
-    
-    if config_update.ytdlp_version is not None:
-        if config_update.ytdlp_version not in ["stable", "nightly"]:
-            raise HTTPException(status_code=400, detail="Version must be 'stable' or 'nightly'")
-        if config_update.ytdlp_version != config.ytdlp_version:
-            config.ytdlp_version = config_update.ytdlp_version
-            has_changes = True
-    
-    if config_update.cookies_enabled is not None:
-        if config_update.cookies_enabled != config.cookies_enabled:
-            config.cookies_enabled = config_update.cookies_enabled
-            has_changes = True
-    
-    if config_update.log_level is not None:
-        if config_update.log_level not in ["debug", "verbose", "info", "warn", "error"]:
-            raise HTTPException(status_code=400, detail="Log level must be 'debug', 'verbose', 'info', 'warn', or 'error'")
-        if config_update.log_level != config.log_level:
-            config.log_level = config_update.log_level
-            has_changes = True
-            # 重新配置日志系统
-            from app.logger import app_logger
-            app_logger.setup_logger()
-    
-    if config_update.language is not None:
-        if config_update.language not in ["en", "zh"]:
-            raise HTTPException(status_code=400, detail="Language must be 'en' or 'zh'")
-        if config_update.language != config.language:
-            config.language = config_update.language
-            has_changes = True
-    
-    if has_changes:
-        from app.config_manager import save_config
-        save_config(config)
-    
-    current_ytdlp_version = get_ytdlp_current_version()
-    return ConfigResponse(
-        default_format=config.default_format,
-        ytdlp_version=config.ytdlp_version,
-        ytdlp_current_version=current_ytdlp_version,
-        cookies_enabled=config.cookies_enabled,
-        log_level=config.log_level,
-        language=config.language
-    )
+    try:
+        config = load_config()
+        app_logger.info(f"Current config loaded: {config}")
+        
+        has_changes = False
+        
+        if config_update.default_format is not None:
+            if config_update.default_format not in ["mp4", "mkv"]:
+                raise HTTPException(status_code=400, detail="Format must be mp4 or mkv")
+            if config_update.default_format != config.default_format:
+                config.default_format = config_update.default_format
+                has_changes = True
+                app_logger.info(f"Updated default_format: {config.default_format}")
+        
+        if config_update.ytdlp_version is not None:
+            if config_update.ytdlp_version not in ["stable", "nightly"]:
+                raise HTTPException(status_code=400, detail="Version must be 'stable' or 'nightly'")
+            if config_update.ytdlp_version != config.ytdlp_version:
+                config.ytdlp_version = config_update.ytdlp_version
+                has_changes = True
+                app_logger.info(f"Updated ytdlp_version: {config.ytdlp_version}")
+        
+        if config_update.cookies_enabled is not None:
+            if config_update.cookies_enabled != config.cookies_enabled:
+                config.cookies_enabled = config_update.cookies_enabled
+                has_changes = True
+                app_logger.info(f"Updated cookies_enabled: {config.cookies_enabled}")
+        
+        if config_update.log_level is not None:
+            if config_update.log_level not in ["debug", "verbose", "info", "warn", "error"]:
+                raise HTTPException(status_code=400, detail="Log level must be 'debug', 'verbose', 'info', 'warn', or 'error'")
+            if config_update.log_level != config.log_level:
+                config.log_level = config_update.log_level
+                has_changes = True
+                app_logger.info(f"Updated log_level: {config.log_level}")
+                # 重新配置日志系统
+                app_logger.setup_logger()
+        
+        if config_update.language is not None:
+            if config_update.language not in ["en", "zh"]:
+                raise HTTPException(status_code=400, detail="Language must be 'en' or 'zh'")
+            if config_update.language != config.language:
+                config.language = config_update.language
+                has_changes = True
+                app_logger.info(f"Updated language: {config.language}")
+        
+        if has_changes:
+            from app.config_manager import save_config
+            app_logger.info("Saving config...")
+            save_config(config)
+            app_logger.info("Config saved successfully")
+        else:
+            app_logger.info("No changes to save")
+        
+        current_ytdlp_version = get_ytdlp_current_version()
+        result = ConfigResponse(
+            default_format=config.default_format,
+            ytdlp_version=config.ytdlp_version,
+            ytdlp_current_version=current_ytdlp_version,
+            cookies_enabled=config.cookies_enabled,
+            log_level=config.log_level,
+            language=config.language
+        )
+        app_logger.info(f"Returning config: {result}")
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        app_logger.error(f"Failed to update config: {e}")
+        app_logger.exception("Config update exception details:")
+        raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}")
 
 @router.post("/config/ytdlp-update", response_model=UpdateResponse)
 async def update_ytdlp_version():

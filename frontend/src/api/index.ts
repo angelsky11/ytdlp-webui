@@ -115,7 +115,19 @@ export async function getVideoInfo(request: DownloadRequest): Promise<VideoInfo>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
-  if (!response.ok) throw new Error('Failed to get video info');
+  
+  if (!response.ok) {
+    let errorMessage = 'Failed to get video info';
+    try {
+      const errorData = await response.json();
+      if (errorData.detail) {
+        errorMessage = errorData.detail;
+      }
+    } catch (e) {
+      // Ignore JSON parse error
+    }
+    throw new Error(errorMessage);
+  }
   return response.json();
 }
 
@@ -178,7 +190,19 @@ export async function updateConfig(config: UpdateConfigRequest): Promise<AppConf
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(config),
   });
-  if (!response.ok) throw new Error('Failed to update config');
+  
+  if (!response.ok) {
+    let errorMessage = 'Failed to update config';
+    try {
+      const errorData = await response.json();
+      if (errorData.detail) {
+        errorMessage = errorData.detail;
+      }
+    } catch (e) {
+      // Ignore JSON parse error
+    }
+    throw new Error(errorMessage);
+  }
   return response.json();
 }
 
