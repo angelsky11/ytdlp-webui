@@ -9,13 +9,13 @@ import os
 # 导入日志模块
 from app.logger import app_logger
 
-# 导入 API 路由（确保所有模型类被注册到 Base）
-from app.api import downloads, files, config
-
-# 所有模型注册完成后，初始化数据库表
+# 立即初始化数据库表（模型类已在 database.py 中注册到 Base.metadata）
 init_db()
 
-# 数据库表创建后再初始化 DownloadManager（它需要查询 DB）
+# 导入 API 路由（此时数据库表已存在，DownloadManager 初始化时不会报错）
+from app.api import downloads, files, config
+
+# 初始化 DownloadManager（它需要查询 DB）
 from app.services.downloader import download_manager
 from app.models.schemas import DownloadProgress
 
