@@ -19,7 +19,7 @@ COPY backend/app/ ./app/
 
 COPY --from=frontend-builder /app/frontend/dist/ ./frontend/dist/
 
-RUN mkdir -p /downloads /config
+RUN mkdir -p /app/downloads /app/config
 
 ENV PYTHONPATH=/app
 

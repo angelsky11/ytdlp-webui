@@ -77,7 +77,7 @@ Access **http://localhost:58888** in your browser.
 
 ```bash
 # 使用 Docker Hub 镜像（推荐）
-docker run -d -p 58888:58888 -v ./downloads:/downloads -v ./config:/config angelsky11/ytdlp-webui:latest
+docker run -d -p 58888:58888 -v ./downloads:/app/downloads -v ./config:/app/config angelsky11/ytdlp-webui:latest
 
 # 或使用 docker-compose
 docker compose up -d

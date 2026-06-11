@@ -7,11 +7,7 @@ services:
       - "58888:58888"
     volumes:
       # 配置文件持久化 - 包含用户设置和配置
-      - ./config:/config
+      - ./config:/app/config
       # 下载文件持久化
-      - ./downloads:/downloads
-    environment:
-      - DOWNLOAD_DIR=/downloads
-      - CONFIG_DIR=/config
-      - PORT=58888
+      - ./downloads:/app/downloads
     restart: unless-stopped
