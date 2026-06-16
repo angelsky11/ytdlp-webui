@@ -11,6 +11,15 @@ import traceback
 # 导入日志模块
 from app.logger import app_logger
 
+# 初始化数据库和配置（在导入 download_manager 之前）
+from app.config_manager import init_config_from_template, init_database_from_template
+
+app_logger.info("Initializing config from template...")
+init_config_from_template()
+
+app_logger.info("Initializing database from template...")
+init_database_from_template()
+
 # 导入 API 路由
 from app.api import downloads, files, config
 
@@ -141,15 +150,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 if __name__ == "__main__":
     import uvicorn
     from uvicorn.config import LOGGING_CONFIG
-    from app.config_manager import ensure_all_dependencies, init_config_from_template, init_database_from_template
-    
-    # 从模板初始化配置文件
-    app_logger.info("Initializing config from template...")
-    init_config_from_template()
-    
-    # 从模板初始化数据库文件
-    app_logger.info("Initializing database from template...")
-    init_database_from_template()
+    from app.config_manager import ensure_all_dependencies
     
     # 初始化所有依赖工具（yt-dlp, ffmpeg, deno）
     app_logger.info("Initializing application dependencies...")
