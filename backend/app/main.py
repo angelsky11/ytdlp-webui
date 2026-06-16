@@ -11,14 +11,20 @@ import traceback
 # 导入日志模块
 from app.logger import app_logger
 
+# 初始化标志（避免 uvicorn 重新导入时重复初始化）
+_INITIALIZED = False
+
 # 初始化数据库和配置（在导入 download_manager 之前）
 from app.config_manager import init_config_from_template, init_database_from_template
 
-app_logger.info("Initializing config from template...")
-init_config_from_template()
+if not _INITIALIZED:
+    app_logger.info("Initializing config from template...")
+    init_config_from_template()
 
-app_logger.info("Initializing database from template...")
-init_database_from_template()
+    app_logger.info("Initializing database from template...")
+    init_database_from_template()
+    
+    _INITIALIZED = True
 
 # 导入 API 路由
 from app.api import downloads, files, config

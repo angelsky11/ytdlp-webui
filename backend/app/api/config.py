@@ -45,8 +45,15 @@ class CookiesFileItem(BaseModel):
 @router.get("/config", response_model=ConfigResponse)
 async def get_config():
     """Get current configuration"""
+    app_logger.info("="*60)
+    app_logger.info("API: GET /config")
+    app_logger.info("="*60)
+    
     config = load_config()
     current_ytdlp_version = get_ytdlp_current_version()
+    
+    app_logger.info(f"Returning config: default_format={config.default_format}, ytdlp_version={config.ytdlp_version}, cookies_enabled={config.cookies_enabled}")
+    
     return ConfigResponse(
         default_format=config.default_format,
         ytdlp_version=config.ytdlp_version,
