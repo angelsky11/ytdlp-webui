@@ -44,48 +44,30 @@ def get_cookies_dir():
     os.makedirs(cookies_dir, exist_ok=True)
     return cookies_dir
 
+def init_config_from_template() -> None:
+    """Initialize config.json from template if it doesn't exist"""
+    if not os.path.exists(CONFIG_FILE):
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        shutil.copy(CONFIG_TEMPLATE_FILE, CONFIG_FILE)
+        try:
+            from app.logger import app_logger
+            app_logger.info(f"Config file created from template: {CONFIG_FILE}")
+        except ImportError:
+            pass
+
 def load_config() -> AppConfig:
-    """Load configuration from file. If config.json doesn't exist, copy from template."""
-    # 如果配置文件存在，正常加载
+    """Load configuration from file"""
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 return AppConfig(**data)
         except Exception as e:
-            # Lazy import to avoid circular import
             try:
                 from app.logger import app_logger
                 app_logger.error(f"Failed to parse config.json: {e}")
             except ImportError:
                 pass
-            pass
-    
-    # 如果配置文件不存在，尝试从模板复制
-    if os.path.exists(CONFIG_TEMPLATE_FILE):
-        try:
-            os.makedirs(CONFIG_DIR, exist_ok=True)
-            shutil.copy(CONFIG_TEMPLATE_FILE, CONFIG_FILE)
-            # Lazy import to avoid circular import
-            try:
-                from app.logger import app_logger
-                app_logger.info(f"Config file created from template: {CONFIG_FILE}")
-            except ImportError:
-                pass
-            
-            # 从新创建的文件加载配置
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return AppConfig(**data)
-        except Exception as e:
-            # Lazy import to avoid circular import
-            try:
-                from app.logger import app_logger
-                app_logger.error(f"Failed to copy config from template: {e}")
-            except ImportError:
-                pass
-    
-    # 返回默认配置
     return AppConfig()
 
 def save_config(config: AppConfig) -> None:

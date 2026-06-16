@@ -145,7 +145,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 if __name__ == "__main__":
     import uvicorn
     from uvicorn.config import LOGGING_CONFIG
-    from app.config_manager import ensure_all_dependencies
+    from app.config_manager import ensure_all_dependencies, init_config_from_template
+    
+    # 从模板初始化配置文件
+    app_logger.info("Initializing config from template...")
+    init_config_from_template()
     
     # 初始化所有依赖工具（yt-dlp, ffmpeg, deno）
     app_logger.info("Initializing application dependencies...")
