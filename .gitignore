@@ -11,6 +11,7 @@ build/
 # Config and data (runtime generated)
 config/
 !config/config-template.json
+!config/database-template.db
 
 # Environment files
 .env

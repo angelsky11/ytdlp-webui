@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from app.models.database import init_db
 from app.config import PORT
 import os
 import traceback
@@ -12,10 +11,7 @@ import traceback
 # 导入日志模块
 from app.logger import app_logger
 
-# 立即初始化数据库表（模型类已在 database.py 中注册到 Base.metadata）
-init_db()
-
-# 导入 API 路由（此时数据库表已存在，DownloadManager 初始化时不会报错）
+# 导入 API 路由
 from app.api import downloads, files, config
 
 # 初始化 DownloadManager（它需要查询 DB）
@@ -145,11 +141,15 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 if __name__ == "__main__":
     import uvicorn
     from uvicorn.config import LOGGING_CONFIG
-    from app.config_manager import ensure_all_dependencies, init_config_from_template
+    from app.config_manager import ensure_all_dependencies, init_config_from_template, init_database_from_template
     
     # 从模板初始化配置文件
     app_logger.info("Initializing config from template...")
     init_config_from_template()
+    
+    # 从模板初始化数据库文件
+    app_logger.info("Initializing database from template...")
+    init_database_from_template()
     
     # 初始化所有依赖工具（yt-dlp, ffmpeg, deno）
     app_logger.info("Initializing application dependencies...")

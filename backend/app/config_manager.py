@@ -24,6 +24,8 @@ def get_logs_dir():
 LOGS_DIR = get_logs_dir()
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 CONFIG_TEMPLATE_FILE = os.path.join(CONFIG_DIR, "config-template.json")
+DATABASE_FILE = os.path.join(CONFIG_DIR, "database.db")
+DATABASE_TEMPLATE_FILE = os.path.join(CONFIG_DIR, "database-template.db")
 
 def get_ytdlp_dir():
     return os.path.join(CONFIG_DIR, "ytdlp")
@@ -52,6 +54,17 @@ def init_config_from_template() -> None:
         try:
             from app.logger import app_logger
             app_logger.info(f"Config file created from template: {CONFIG_FILE}")
+        except ImportError:
+            pass
+
+def init_database_from_template() -> None:
+    """Initialize database.db from template if it doesn't exist"""
+    if not os.path.exists(DATABASE_FILE):
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        shutil.copy(DATABASE_TEMPLATE_FILE, DATABASE_FILE)
+        try:
+            from app.logger import app_logger
+            app_logger.info(f"Database file created from template: {DATABASE_FILE}")
         except ImportError:
             pass
 
