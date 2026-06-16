@@ -2,7 +2,7 @@ import type { DownloadRequest, DownloadProgress, FileInfo, VideoInfo } from '../
 import { DownloadStatus } from '../types';
 import { mockDownloads, mockFiles, mockVideoInfo } from './mock';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:58888';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export interface AppConfig {
@@ -35,7 +35,7 @@ export async function createDownload(request: DownloadRequest): Promise<Download
     };
   }
   
-  const response = await fetch(`${API_BASE}/downloads/`, {
+  const response = await fetch(`${API_BASE}/downloads`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
@@ -61,7 +61,7 @@ export async function listDownloads(): Promise<DownloadProgress[]> {
     return mockDownloads;
   }
   
-  const response = await fetch(`${API_BASE}/downloads/`);
+  const response = await fetch(`${API_BASE}/downloads`);
   if (!response.ok) throw new Error('Failed to list downloads');
   return response.json();
 }
@@ -137,7 +137,7 @@ export async function listFiles(): Promise<FileInfo[]> {
     return mockFiles;
   }
   
-  const response = await fetch(`${API_BASE}/files/`);
+  const response = await fetch(`${API_BASE}/files`);
   if (!response.ok) throw new Error('Failed to list files');
   return response.json();
 }
