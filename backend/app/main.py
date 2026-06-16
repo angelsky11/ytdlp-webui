@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -41,6 +41,7 @@ app_logger.info("="*60)
 app = FastAPI(
     docs_url=None,
     redoc_url=None,
+    redirect_slashes=True,
 )
 
 app.add_middleware(

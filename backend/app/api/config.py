@@ -42,7 +42,7 @@ class CookiesFileItem(BaseModel):
     size: int
     modified: float
 
-@router.get("/", response_model=ConfigResponse)
+@router.get("", response_model=ConfigResponse)
 async def get_config():
     """Get current configuration"""
     app_logger.info("="*60)
@@ -63,7 +63,7 @@ async def get_config():
         language=config.language
     )
 
-@router.put("/", response_model=ConfigResponse)
+@router.put("", response_model=ConfigResponse)
 async def update_config(config_update: ConfigUpdate):
     """Update configuration"""
     app_logger.info("="*60)

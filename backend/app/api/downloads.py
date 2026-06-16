@@ -11,10 +11,10 @@ from app.logger import app_logger
 router = APIRouter(prefix="/downloads", tags=["downloads"])
 
 
-@router.post("/", response_model=DownloadProgress)
+@router.post("", response_model=DownloadProgress)
 async def create_download(request: DownloadRequest, background_tasks: BackgroundTasks):
     app_logger.info("="*60)
-    app_logger.info("API: POST /downloads/")
+    app_logger.info("API: POST /downloads")
     app_logger.info(f"Request: {request}")
     app_logger.info("="*60)
     
@@ -50,9 +50,9 @@ async def get_download_status(task_id: str):
     return task.to_progress()
 
 
-@router.get("/", response_model=list[DownloadProgress])
+@router.get("", response_model=list[DownloadProgress])
 async def list_downloads():
-    app_logger.debug("API: GET /downloads/")
+    app_logger.debug("API: GET /downloads")
     tasks = download_manager.get_all_tasks()
     app_logger.debug(f"Returning {len(tasks)} tasks")
     return [task.to_progress() for task in tasks]

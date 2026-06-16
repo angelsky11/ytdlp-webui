@@ -10,7 +10,7 @@ from app.services.downloader import get_file_group_key, remove_downloaded_file_f
 router = APIRouter(prefix="/files", tags=["files"])
 
 
-@router.get("/", response_model=list[FileInfo])
+@router.get("", response_model=list[FileInfo])
 async def list_files():
     """从数据库读取文件列表（不扫描文件系统，提升速度）"""
     db = next(get_db())
