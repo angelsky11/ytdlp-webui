@@ -8,7 +8,7 @@ from app.config_manager import (
 )
 from app.logger import app_logger
 
-router = APIRouter()
+router = APIRouter(prefix="/config", tags=["config"])
 
 class ConfigResponse(BaseModel):
     default_format: str
@@ -42,7 +42,7 @@ class CookiesFileItem(BaseModel):
     size: int
     modified: float
 
-@router.get("/config", response_model=ConfigResponse)
+@router.get("/", response_model=ConfigResponse)
 async def get_config():
     """Get current configuration"""
     app_logger.info("="*60)
@@ -63,7 +63,7 @@ async def get_config():
         language=config.language
     )
 
-@router.put("/config", response_model=ConfigResponse)
+@router.put("/", response_model=ConfigResponse)
 async def update_config(config_update: ConfigUpdate):
     """Update configuration"""
     app_logger.info("="*60)
@@ -144,19 +144,19 @@ async def update_config(config_update: ConfigUpdate):
         app_logger.exception("Config update exception details:")
         raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}")
 
-@router.post("/config/ytdlp-update", response_model=UpdateResponse)
+@router.post("/ytdlp-update", response_model=UpdateResponse)
 async def update_ytdlp_version():
     """Download/update yt-dlp executable to the configured version"""
     result = download_ytdlp()
     return UpdateResponse(**result)
 
-@router.get("/config/cookies", response_model=List[CookiesFileItem])
+@router.get("/cookies", response_model=List[CookiesFileItem])
 async def list_cookies_files():
     """List all cookies files"""
     files = get_cookies_files()
     return [CookiesFileItem(name=f["name"], size=f["size"], modified=f["modified"]) for f in files]
 
-@router.post("/config/cookies", response_model=CookiesUploadResponse)
+@router.post("/cookies", response_model=CookiesUploadResponse)
 async def upload_cookies(file: UploadFile = File(...)):
     """Upload a cookies file"""
     if not file.filename.endswith('.txt'):
@@ -167,7 +167,7 @@ async def upload_cookies(file: UploadFile = File(...)):
     
     return CookiesUploadResponse(**result)
 
-@router.delete("/config/cookies/{filename}", response_model=dict)
+@router.delete("/cookies/{filename}", response_model=dict)
 async def remove_cookies(filename: str):
     """Delete a specific cookies file"""
     result = delete_cookies(filename)
@@ -181,7 +181,7 @@ class LogFileItem(BaseModel):
     modified: float
     date: str
 
-@router.get("/config/logs", response_model=List[LogFileItem])
+@router.get("/logs", response_model=List[LogFileItem])
 async def list_log_files():
     """List all log files grouped by date"""
     from app.config_manager import get_logs_dir
@@ -209,7 +209,7 @@ async def list_log_files():
     files.sort(key=lambda x: x.modified, reverse=True)
     return files
 
-@router.get("/config/logs/{filename}")
+@router.get("/logs/{filename}")
 async def get_log_file(filename: str):
     """Get content of a specific log file"""
     from app.config_manager import get_logs_dir
@@ -226,7 +226,7 @@ async def get_log_file(filename: str):
     
     return {"filename": filename, "content": content}
 
-@router.delete("/config/logs/{filename}", response_model=dict)
+@router.delete("/logs/{filename}", response_model=dict)
 async def delete_log_file(filename: str):
     """Delete a specific log file"""
     from app.config_manager import get_logs_dir
@@ -265,7 +265,7 @@ async def delete_log_file(filename: str):
     app_logger.info(f"Deleted log file: {filename}")
     return {"success": True}
 
-@router.delete("/config/logs", response_model=dict)
+@router.delete("/logs", response_model=dict)
 async def clear_all_logs():
     """Delete all log files"""
     from app.config_manager import get_logs_dir
