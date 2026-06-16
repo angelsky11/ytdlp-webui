@@ -128,12 +128,11 @@ async def get_video_info(request: DownloadRequest):
             '--no-warnings',
             # deno 运行时（yt-dlp 推荐，处理 YouTube JS 挑战）
             '--js-runtime', 'deno',
-            # cookies
-            '--cookies', cookies_path if cookies_path else '',
         ]
         
-        # 移除空的 cookies 参数
-        args = [arg for arg in args if arg != '']
+        # 只在 cookies_path 不为空时添加 --cookies 参数
+        if cookies_path:
+            args.extend(['--cookies', cookies_path])
         
         # 添加 URL
         args.append(request.url)
