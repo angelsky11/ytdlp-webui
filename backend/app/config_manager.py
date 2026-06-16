@@ -370,14 +370,25 @@ def delete_cookies(filename: str) -> dict:
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+class CookiesNotFoundError(Exception):
+    """Raised when cookies are enabled but no matching cookies file is found"""
+    pass
+
+
 def get_cookies_path_for_url(url: str) -> Optional[str]:
-    """Get cookies file path based on URL domain"""
+    """Get cookies file path based on URL domain
+    
+    Returns:
+        - None: if cookies are not enabled
+        - str: path to matching cookies file
+        - Raises CookiesNotFoundError: if cookies are enabled but no matching file found
+    """
     if not is_cookies_enabled():
         return None
     
     cookies_files = get_cookies_files()
     if not cookies_files:
-        return None
+        raise CookiesNotFoundError("Cookies are enabled but no cookies files found. Please upload cookies files.")
     
     # Try to match filename with domain
     # Common patterns: youtube.txt, twitch.txt, etc.
@@ -386,8 +397,8 @@ def get_cookies_path_for_url(url: str) -> Optional[str]:
         if name in url.lower():
             return cf["path"]
     
-    # Return first cookies file if no match
-    return cookies_files[0]["path"] if cookies_files else None
+    # No matching cookies file found
+    raise CookiesNotFoundError(f"Cookies are enabled but no matching cookies file found for URL: {url}. Please upload cookies file for this site.")
 
 def get_log_level() -> str:
     """Get log level setting"""

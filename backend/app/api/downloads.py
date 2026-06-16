@@ -5,7 +5,7 @@ import subprocess
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from app.models.schemas import DownloadRequest, DownloadProgress, VideoInfo, VideoFormat
 from app.services.downloader import download_manager, get_ytdlp_env
-from app.config_manager import get_ytdlp_path, get_cookies_path_for_url
+from app.config_manager import get_ytdlp_path, get_cookies_path_for_url, CookiesNotFoundError
 from app.logger import app_logger
 
 router = APIRouter(prefix="/downloads", tags=["downloads"])
@@ -238,6 +238,9 @@ async def get_video_info(request: DownloadRequest):
         app_logger.info("Video info extracted successfully")
         return result
         
+    except CookiesNotFoundError as e:
+        app_logger.error(f"Cookies error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
