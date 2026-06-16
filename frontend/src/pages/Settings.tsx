@@ -76,9 +76,20 @@ export default function Settings() {
   }, [fetchLogFiles, t]);
 
   useEffect(() => {
-    fetchCookiesFiles();
-    fetchLogFiles();
-  }, [fetchCookiesFiles, fetchLogFiles]);
+    const loadData = async () => {
+      fetchCookiesFiles();
+      setLogFilesLoading(true);
+      try {
+        const files = await getLogFiles();
+        setLogFiles(files);
+      } catch {
+        message.error(t('settings.saveFailed'));
+      } finally {
+        setLogFilesLoading(false);
+      }
+    };
+    loadData();
+  }, [t]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -242,7 +253,7 @@ export default function Settings() {
               <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Text strong>{t('settings.cookiesFiles')}:</Text>
                 <input
-                  ref={fileInputRef as any}
+                  ref={fileInputRef}
                   type="file"
                   accept=".txt"
                   style={{ display: 'none' }}

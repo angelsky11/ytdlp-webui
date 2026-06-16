@@ -123,7 +123,7 @@ export async function getVideoInfo(request: DownloadRequest): Promise<VideoInfo>
       if (errorData.detail) {
         errorMessage = errorData.detail;
       }
-    } catch (e) {
+    } catch {
       // Ignore JSON parse error
     }
     throw new Error(errorMessage);
@@ -198,7 +198,7 @@ export async function updateConfig(config: UpdateConfigRequest): Promise<AppConf
       if (errorData.detail) {
         errorMessage = errorData.detail;
       }
-    } catch (e) {
+    } catch {
       // Ignore JSON parse error
     }
     throw new Error(errorMessage);
