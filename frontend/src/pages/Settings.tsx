@@ -163,20 +163,6 @@ export default function Settings() {
       <Card>
       <Title level={4}>{t('settings.title')}</Title>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <div>
-          <Text strong>{t('settings.downloadDir')}:</Text>
-          <Text style={{ marginLeft: 8 }}>/downloads</Text>
-        </div>
-        <div>
-          <Text strong>{t('settings.configDir')}:</Text>
-          <Text style={{ marginLeft: 8 }}>./config</Text>
-        </div>
-        <div>
-          <Text strong>{t('settings.port')}:</Text>
-          <Text style={{ marginLeft: 8 }}>58888</Text>
-        </div>
-        <Divider style={{ margin: '16px 0' }} />
-
         {/* Language Selector */}
         <div>
           <Text strong>{t('settings.language')}:</Text>
