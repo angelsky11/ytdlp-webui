@@ -316,12 +316,7 @@ export function getWebSocketUrl(): string {
   if (USE_MOCK) {
     return '';
   }
-  // Use relative path for WebSocket when API_BASE is relative
-  if (API_BASE.startsWith('/')) {
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${wsProtocol}//${window.location.host}${API_BASE}/ws`;
-  }
-  const wsProtocol = API_BASE.startsWith('https') ? 'wss' : 'ws';
-  const host = API_BASE.replace(/^https?:\/\//, '');
-  return `${wsProtocol}://${host}/ws`;
+  // Always use relative path for WebSocket to work in any environment
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${wsProtocol}//${window.location.host}/api/ws`;
 }

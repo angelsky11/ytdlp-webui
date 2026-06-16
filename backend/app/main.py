@@ -2,9 +2,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.models.database import init_db
 from app.config import PORT
 import os
+import traceback
 
 # 导入日志模块
 from app.logger import app_logger
@@ -20,7 +23,9 @@ from app.services.downloader import download_manager
 from app.models.schemas import DownloadProgress
 
 # 记录启动日志
-app_logger.info("Application starting...")
+app_logger.info("="*60)
+app_logger.info("ytdlp-webui starting...")
+app_logger.info("="*60)
 
 app = FastAPI(
     docs_url=None,
@@ -115,3 +120,39 @@ async def icons():
 async def serve_spa(request: Request, full_path: str):
     """Serve index.html for all non-API routes (SPA routing)"""
     return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+
+
+# Global exception handlers for better error logging
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions"""
+    app_logger.error(f"HTTP Exception: {exc.status_code} - {exc.detail}")
+    app_logger.error(f"Request URL: {request.url}")
+    app_logger.error(f"Request method: {request.method}")
+    raise exc
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors"""
+    app_logger.error(f"Validation Error: {exc.errors()}")
+    app_logger.error(f"Request URL: {request.url}")
+    app_logger.error(f"Request method: {request.method}")
+    app_logger.error(f"Body: {await request.body()}")
+    raise exc
+
+
+if __name__ == "__main__":
+    import uvicorn
+    from uvicorn.config import LOGGING_CONFIG
+    
+    # Override uvicorn logging format to include timestamp
+    LOGGING_CONFIG["formatters"]["default"]["fmt"] = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    LOGGING_CONFIG["formatters"]["access"]["fmt"] = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=PORT,
+        log_config=LOGGING_CONFIG
+    )

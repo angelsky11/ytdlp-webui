@@ -50,33 +50,37 @@ class Logger:
         # Clear existing handlers if any
         self.logger.handlers.clear()
         
-        # Create logs directory if not exists
-        logs_dir = get_logs_dir()
-        
-        # Create file handler with date (daily rotation)
-        log_filename = self.get_today_log_filename()
-        log_filepath = os.path.join(logs_dir, log_filename)
-        
-        # Use append mode to continue writing to the same file for the day
-        self.file_handler = logging.FileHandler(log_filepath, mode='a', encoding='utf-8')
-        self.file_handler.setLevel(self._get_log_level())
-        self.current_log_date = datetime.now().date()
-        
-        # Create console handler
-        self.console_handler = logging.StreamHandler()
-        self.console_handler.setLevel(self._get_log_level())
-        
         # Create formatter
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
-        self.file_handler.setFormatter(formatter)
-        self.console_handler.setFormatter(formatter)
         
-        # Add handlers
-        self.logger.addHandler(self.file_handler)
+        # Create console handler (always enable for Docker logs)
+        self.console_handler = logging.StreamHandler()
+        self.console_handler.setLevel(logging.DEBUG)  # Always debug level for console
+        self.console_handler.setFormatter(formatter)
         self.logger.addHandler(self.console_handler)
+        
+        try:
+            # Create logs directory if not exists
+            logs_dir = get_logs_dir()
+            
+            # Create file handler with date (daily rotation)
+            log_filename = self.get_today_log_filename()
+            log_filepath = os.path.join(logs_dir, log_filename)
+            
+            # Use append mode to continue writing to the same file for the day
+            self.file_handler = logging.FileHandler(log_filepath, mode='a', encoding='utf-8')
+            self.file_handler.setLevel(self._get_log_level())
+            self.file_handler.setFormatter(formatter)
+            self.logger.addHandler(self.file_handler)
+            self.current_log_date = datetime.now().date()
+            self.logger.info(f"Logging to file: {log_filepath}")
+        except Exception as e:
+            # If file logging fails (e.g., permission issues), log to console instead
+            self.logger.warning(f"Failed to create file handler: {e}")
+            self.logger.warning("Only console logging will be available")
     
     def _check_rotation(self):
         """Check if we need to rotate log file (new day)"""
@@ -97,22 +101,25 @@ class Logger:
         if self.file_handler:
             self.close_file()
         
-        # Create new file handler
-        logs_dir = get_logs_dir()
-        log_filename = self.get_today_log_filename()
-        log_filepath = os.path.join(logs_dir, log_filename)
-        
-        # Use append mode to continue writing to the same file for the day
-        self.file_handler = logging.FileHandler(log_filepath, mode='a', encoding='utf-8')
-        self.file_handler.setLevel(self._get_log_level())
-        self.current_log_date = datetime.now().date()
-        
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-        self.file_handler.setFormatter(formatter)
-        self.logger.addHandler(self.file_handler)
+        try:
+            # Create new file handler
+            logs_dir = get_logs_dir()
+            log_filename = self.get_today_log_filename()
+            log_filepath = os.path.join(logs_dir, log_filename)
+            
+            # Use append mode to continue writing to the same file for the day
+            self.file_handler = logging.FileHandler(log_filepath, mode='a', encoding='utf-8')
+            self.file_handler.setLevel(self._get_log_level())
+            formatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S'
+            )
+            self.file_handler.setFormatter(formatter)
+            self.logger.addHandler(self.file_handler)
+            self.current_log_date = datetime.now().date()
+            self.logger.info(f"Rotated log file to: {log_filepath}")
+        except Exception as e:
+            self.logger.warning(f"Failed to rotate log file: {e}")
     
     def set_log_level(self, level_str: str):
         """Update log level dynamically"""
