@@ -15,11 +15,6 @@ from app.logger import app_logger
 # 立即初始化数据库表（模型类已在 database.py 中注册到 Base.metadata）
 init_db()
 
-# 初始化所有依赖工具（yt-dlp, ffmpeg, deno）
-from app.config_manager import ensure_all_dependencies
-app_logger.info("Initializing application dependencies...")
-ensure_all_dependencies()
-
 # 导入 API 路由（此时数据库表已存在，DownloadManager 初始化时不会报错）
 from app.api import downloads, files, config
 
@@ -150,6 +145,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 if __name__ == "__main__":
     import uvicorn
     from uvicorn.config import LOGGING_CONFIG
+    from app.config_manager import ensure_all_dependencies
+    
+    # 初始化所有依赖工具（yt-dlp, ffmpeg, deno）
+    app_logger.info("Initializing application dependencies...")
+    ensure_all_dependencies()
     
     # Override uvicorn logging format to include timestamp
     LOGGING_CONFIG["formatters"]["default"]["fmt"] = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
