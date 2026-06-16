@@ -77,7 +77,7 @@ export default function Settings() {
 
   useEffect(() => {
     const loadData = async () => {
-      fetchCookiesFiles();
+      await fetchCookiesFiles();
       setLogFilesLoading(true);
       try {
         const files = await getLogFiles();
@@ -89,7 +89,7 @@ export default function Settings() {
       }
     };
     loadData();
-  }, [t]);
+  }, [fetchCookiesFiles, t]);
 
   const handleSave = async () => {
     setSaving(true);
