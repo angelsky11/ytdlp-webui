@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import subprocess
 import platform
 from typing import Optional, List
@@ -22,6 +23,7 @@ def get_logs_dir():
 
 LOGS_DIR = get_logs_dir()
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
+CONFIG_TEMPLATE_FILE = os.path.join(CONFIG_DIR, "config-template.json")
 
 def get_ytdlp_dir():
     return os.path.join(CONFIG_DIR, "ytdlp")
@@ -43,14 +45,47 @@ def get_cookies_dir():
     return cookies_dir
 
 def load_config() -> AppConfig:
-    """Load configuration from file"""
+    """Load configuration from file. If config.json doesn't exist, copy from template."""
+    # 如果配置文件存在，正常加载
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 return AppConfig(**data)
-        except Exception:
+        except Exception as e:
+            # Lazy import to avoid circular import
+            try:
+                from app.logger import app_logger
+                app_logger.error(f"Failed to parse config.json: {e}")
+            except ImportError:
+                pass
             pass
+    
+    # 如果配置文件不存在，尝试从模板复制
+    if os.path.exists(CONFIG_TEMPLATE_FILE):
+        try:
+            os.makedirs(CONFIG_DIR, exist_ok=True)
+            shutil.copy(CONFIG_TEMPLATE_FILE, CONFIG_FILE)
+            # Lazy import to avoid circular import
+            try:
+                from app.logger import app_logger
+                app_logger.info(f"Config file created from template: {CONFIG_FILE}")
+            except ImportError:
+                pass
+            
+            # 从新创建的文件加载配置
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return AppConfig(**data)
+        except Exception as e:
+            # Lazy import to avoid circular import
+            try:
+                from app.logger import app_logger
+                app_logger.error(f"Failed to copy config from template: {e}")
+            except ImportError:
+                pass
+    
+    # 返回默认配置
     return AppConfig()
 
 def save_config(config: AppConfig) -> None:
