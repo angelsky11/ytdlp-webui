@@ -5,7 +5,7 @@ import subprocess
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from app.models.schemas import DownloadRequest, DownloadProgress, VideoInfo, VideoFormat
 from app.services.downloader import download_manager, get_ytdlp_env
-from app.config_manager import get_ytdlp_path, get_cookies_path_for_url, ensure_deno_installed, ensure_ytdlp_installed
+from app.config_manager import get_ytdlp_path, get_cookies_path_for_url
 from app.logger import app_logger
 
 router = APIRouter(prefix="/downloads", tags=["downloads"])
@@ -119,14 +119,6 @@ async def get_video_info(request: DownloadRequest):
     try:
         ytdlp_path = get_ytdlp_path()
         cookies_path = get_cookies_path_for_url(request.url)
-        
-        # 确保 yt-dlp 已安装
-        app_logger.info("Ensuring yt-dlp is installed...")
-        ensure_ytdlp_installed()
-        
-        # 确保 deno 已安装（用于 YouTube JS 挑战）
-        app_logger.info("Ensuring Deno is installed...")
-        ensure_deno_installed()
         
         # 构建命令参数（使用 deno 运行时，去除多余参数）
         args = [

@@ -384,3 +384,48 @@ def set_log_level(level: str) -> None:
     config = load_config()
     config.log_level = level
     save_config(config)
+
+
+def ensure_all_dependencies() -> dict:
+    """Ensure all dependency tools are installed (yt-dlp, ffmpeg, deno)"""
+    from app.logger import app_logger
+    
+    results = {
+        "ytdlp": False,
+        "ffmpeg": False,
+        "deno": False
+    }
+    
+    app_logger.info("="*60)
+    app_logger.info("Initializing dependencies...")
+    app_logger.info("="*60)
+    
+    # Ensure yt-dlp is installed
+    app_logger.info("Checking yt-dlp...")
+    results["ytdlp"] = ensure_ytdlp_installed()
+    if results["ytdlp"]:
+        app_logger.info("✓ yt-dlp is installed")
+    else:
+        app_logger.error("✗ Failed to install yt-dlp")
+    
+    # Ensure ffmpeg is installed
+    app_logger.info("Checking ffmpeg...")
+    results["ffmpeg"] = ensure_ffmpeg_installed()
+    if results["ffmpeg"]:
+        app_logger.info("✓ ffmpeg is installed")
+    else:
+        app_logger.error("✗ Failed to install ffmpeg")
+    
+    # Ensure deno is installed
+    app_logger.info("Checking deno...")
+    results["deno"] = ensure_deno_installed()
+    if results["deno"]:
+        app_logger.info("✓ deno is installed")
+    else:
+        app_logger.error("✗ Failed to install deno")
+    
+    app_logger.info("="*60)
+    app_logger.info("Dependency initialization complete")
+    app_logger.info("="*60)
+    
+    return results

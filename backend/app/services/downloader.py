@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Callable, Optional
 from app.config import DOWNLOAD_DIR
 from app.models.schemas import DownloadStatus, DownloadProgress
-from app.config_manager import get_ytdlp_path, ensure_ytdlp_installed, get_cookies_path_for_url, get_ffmpeg_path, ensure_ffmpeg_installed, get_deno_path, ensure_deno_installed
+from app.config_manager import get_ytdlp_path, get_cookies_path_for_url, get_ffmpeg_path, get_deno_path
 from app.models.database import DownloadTaskModel, DownloadedFileModel, get_db
 from app.logger import app_logger
 from datetime import datetime
@@ -476,22 +476,7 @@ class DownloadManager:
         app_logger.info(f"Options: {task.options}")
         app_logger.info(f"="*60)
         
-        # 检查 yt-dlp 是否安装
-        if not ensure_ytdlp_installed():
-            task.status = DownloadStatus.FAILED
-            task.error = "Failed to download yt-dlp executable"
-            app_logger.error(f"Task {task_id}: yt-dlp not installed or download failed")
-            self._save_task_to_db(task)
-            await self.notify_progress(task)
-            return
-        
-        # 检查 ffmpeg 是否安装（用于合并视频+音频）
-        if not ensure_ffmpeg_installed():
-            app_logger.warning(f"Task {task_id}: ffmpeg not available, video merging will be skipped")
-        
-        # 检查 deno 是否安装（用于 YouTube 验证）
-        if not ensure_deno_installed():
-            app_logger.warning(f"Task {task_id}: deno not available, JS challenge solving may fail")
+        # 依赖工具已在应用启动时初始化，此处不再重复检查
 
         task.status = DownloadStatus.DOWNLOADING
         task.stage = 'extracting'
