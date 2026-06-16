@@ -127,27 +127,58 @@ def make_executable(file_path: str) -> None:
         os.chmod(file_path, 0o755)
 
 
-def download_executable(url: str, target_path: str, make_exec: bool = True) -> Dict[str, Any]:
+def download_executable(url: str, target_path: str, make_exec: bool = True, 
+                       retries: int = 3, min_size: int = 1024) -> Dict[str, Any]:
     """
-    下载可执行文件的通用函数
+    下载可执行文件的通用函数，支持重试机制
     
     Args:
         url: 下载链接
         target_path: 目标路径
         make_exec: 是否设置可执行权限
+        retries: 最大重试次数
+        min_size: 最小文件大小（字节），用于验证下载完整性
         
     Returns:
         结果字典，包含 success、error、path 等字段
     """
-    try:
-        os.makedirs(os.path.dirname(target_path), exist_ok=True)
-        urllib.request.urlretrieve(url, target_path)
-        
-        if make_exec and platform.system() != "Windows":
-            os.chmod(target_path, 0o755)
-        
-        logger.info(f"Downloaded executable to: {target_path}")
-        return {"success": True, "path": target_path}
-    except Exception as e:
-        logger.error(f"Failed to download executable {url}: {e}")
-        return {"success": False, "error": str(e)}
+    last_error = None
+    
+    for attempt in range(1, retries + 1):
+        try:
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+            temp_path = target_path + ".tmp"
+            
+            logger.info(f"Downloading executable from {url} (attempt {attempt}/{retries})...")
+            urllib.request.urlretrieve(url, temp_path)
+            
+            # 验证文件大小
+            if os.path.exists(temp_path):
+                file_size = os.path.getsize(temp_path)
+                if file_size < min_size:
+                    logger.warning(f"Downloaded file too small ({file_size} bytes), retrying...")
+                    os.remove(temp_path)
+                    last_error = f"File too small ({file_size} bytes)"
+                    continue
+                
+                # 下载成功，重命名文件
+                if os.path.exists(target_path):
+                    os.remove(target_path)
+                os.rename(temp_path, target_path)
+                
+                if make_exec and platform.system() != "Windows":
+                    os.chmod(target_path, 0o755)
+                
+                logger.info(f"Downloaded executable to: {target_path} ({file_size} bytes)")
+                return {"success": True, "path": target_path, "size": file_size}
+        except Exception as e:
+            logger.error(f"Failed to download executable (attempt {attempt}/{retries}): {e}")
+            last_error = str(e)
+            if os.path.exists(target_path + ".tmp"):
+                try:
+                    os.remove(target_path + ".tmp")
+                except:
+                    pass
+    
+    logger.error(f"Failed to download executable after {retries} attempts: {last_error}")
+    return {"success": False, "error": last_error}

@@ -498,7 +498,8 @@ class DownloadManager:
                 return
             
             # Build command arguments - URL should be at the end for yt-dlp
-            args = [ytdlp_path]
+            # yt-dlp 是一个 Python 脚本，需要用 python3 运行
+            args = ['python3', ytdlp_path]
             
             # Add JS runtime for yt-dlp (important for YouTube validation)
             args.extend(['--js-runtime', 'deno'])

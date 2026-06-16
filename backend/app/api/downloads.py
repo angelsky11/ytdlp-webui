@@ -120,8 +120,10 @@ async def get_video_info(request: DownloadRequest):
         ytdlp_path = get_ytdlp_path()
         cookies_path = get_cookies_path_for_url(request.url)
         
-        # 构建命令参数（使用 deno 运行时，去除多余参数）
+        # 构建命令参数（使用 deno 运行时）
+        # yt-dlp 是一个 Python 脚本，需要用 python3 运行
         args = [
+            'python3',
             ytdlp_path,
             '--dump-json',
             '--no-playlist',
@@ -139,7 +141,7 @@ async def get_video_info(request: DownloadRequest):
         
         # 获取环境变量
         env = get_ytdlp_env()
-        app_logger.info(f"Using yt-dlp: {ytdlp_path}")
+        app_logger.info(f"Using python3 with yt-dlp: {ytdlp_path}")
         app_logger.info(f"Using cookies: {cookies_path}")
         app_logger.info(f"Environment: DENO_NO_PROMPT=1, DENO_DIR={env.get('DENO_DIR')}, XDG_CACHE_HOME={env.get('XDG_CACHE_HOME')}")
         

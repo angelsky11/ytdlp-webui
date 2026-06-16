@@ -243,6 +243,7 @@ def ffmpeg_installed() -> bool:
 def download_ffmpeg() -> dict:
     """Download ffmpeg to config directory"""
     from app.logger import app_logger
+    from app.utils.download import make_executable
     
     ffmpeg_dir = get_ffmpeg_dir()
     os.makedirs(ffmpeg_dir, exist_ok=True)
@@ -268,8 +269,11 @@ def download_ffmpeg() -> dict:
             )
         
         if success:
-            app_logger.info(f"ffmpeg installed at: {get_ffmpeg_path()}")
-            return {"success": True, "path": get_ffmpeg_path()}
+            ffmpeg_path = get_ffmpeg_path()
+            # 确保 ffmpeg 文件有可执行权限（非 Windows）
+            make_executable(ffmpeg_path)
+            app_logger.info(f"ffmpeg installed at: {ffmpeg_path}")
+            return {"success": True, "path": ffmpeg_path}
         else:
             return {"success": False, "error": "Download or extraction failed"}
     except Exception as e:
@@ -317,6 +321,7 @@ def deno_installed() -> bool:
 def download_deno() -> dict:
     """Download deno to config directory"""
     from app.logger import app_logger
+    from app.utils.download import make_executable
     
     deno_dir = get_deno_dir()
     system = platform.system()
@@ -334,8 +339,11 @@ def download_deno() -> dict:
             success = download_and_extract_zip(url, deno_dir)
         
         if success:
-            app_logger.info(f"Deno installed at: {get_deno_path()}")
-            return {"success": True, "path": get_deno_path()}
+            deno_path = get_deno_path()
+            # 确保 deno 文件有可执行权限
+            make_executable(deno_path)
+            app_logger.info(f"Deno installed at: {deno_path}")
+            return {"success": True, "path": deno_path}
         else:
             return {"success": False, "error": "Download or extraction failed"}
     except Exception as e:
