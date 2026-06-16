@@ -110,7 +110,7 @@ export async function getVideoInfo(request: DownloadRequest): Promise<VideoInfo>
     return mockVideoInfo;
   }
   
-  const response = await fetch(`${API_BASE}/downloads/info`, {
+  const response = await fetch(`${API_BASE}/api/downloads/info`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
