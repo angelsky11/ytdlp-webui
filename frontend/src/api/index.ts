@@ -167,7 +167,7 @@ export async function getConfig(): Promise<AppConfig> {
     return { default_format: 'mp4', ytdlp_version: 'stable', ytdlp_current_version: '2024.01.01', cookies_enabled: false, log_level: 'info', language: 'en' };
   }
   
-  const response = await fetch(`${API_BASE}/config`);
+  const response = await fetch(`${API_BASE}/api/config`);
   if (!response.ok) throw new Error('Failed to get config');
   return response.json();
 }
@@ -212,7 +212,7 @@ export async function getCookiesFiles(): Promise<{ name: string; size: number; m
     return [{ name: 'youtube.txt', size: 1024, modified: Date.now() }];
   }
   
-  const response = await fetch(`${API_BASE}/config/cookies`);
+  const response = await fetch(`${API_BASE}/api/config/cookies`);
   if (!response.ok) throw new Error('Failed to get cookies files');
   return response.json();
 }
@@ -226,7 +226,7 @@ export async function uploadCookies(file: File): Promise<{ success: boolean; fil
   const formData = new FormData();
   formData.append('file', file);
   
-  const response = await fetch(`${API_BASE}/config/cookies`, {
+  const response = await fetch(`${API_BASE}/api/config/cookies`, {
     method: 'POST',
     body: formData,
   });
@@ -240,7 +240,7 @@ export async function deleteCookies(filename: string): Promise<{ success: boolea
     return { success: true };
   }
   
-  const response = await fetch(`${API_BASE}/config/cookies/${encodeURIComponent(filename)}`, {
+  const response = await fetch(`${API_BASE}/api/config/cookies/${encodeURIComponent(filename)}`, {
     method: 'DELETE',
   });
   if (!response.ok) throw new Error('Failed to delete cookies');
@@ -263,7 +263,7 @@ export async function getLogFiles(): Promise<LogFile[]> {
     ];
   }
   
-  const response = await fetch(`${API_BASE}/config/logs`);
+  const response = await fetch(`${API_BASE}/api/config/logs`);
   if (!response.ok) throw new Error('Failed to get log files');
   return response.json();
 }
@@ -274,7 +274,7 @@ export async function getLogFileContent(filename: string): Promise<{ filename: s
     return { filename, content: '2024-01-01 12:00:00 - INFO - Application started\n2024-01-01 12:01:00 - DEBUG - Debug message' };
   }
   
-  const response = await fetch(`${API_BASE}/config/logs/${encodeURIComponent(filename)}`);
+  const response = await fetch(`${API_BASE}/api/config/logs/${encodeURIComponent(filename)}`);
   if (!response.ok) throw new Error('Failed to get log file content');
   return response.json();
 }
@@ -285,7 +285,7 @@ export async function deleteLogFile(filename: string): Promise<void> {
     return;
   }
   
-  const response = await fetch(`${API_BASE}/config/logs/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+  const response = await fetch(`${API_BASE}/api/config/logs/${encodeURIComponent(filename)}`, { method: 'DELETE' });
   if (!response.ok) throw new Error('Failed to delete log file');
 }
 
@@ -295,7 +295,7 @@ export async function clearAllLogs(): Promise<void> {
     return;
   }
   
-  const response = await fetch(`${API_BASE}/config/logs`, { method: 'DELETE' });
+  const response = await fetch(`${API_BASE}/api/config/logs`, { method: 'DELETE' });
   if (!response.ok) throw new Error('Failed to clear logs');
 }
 
@@ -305,7 +305,7 @@ export async function updateYtdlp(): Promise<{ success: boolean; version?: strin
     return { success: true, version: '2024.06.07', type: 'stable', path: '/config/ytdlp/yt-dlp' };
   }
   
-  const response = await fetch(`${API_BASE}/config/ytdlp-update`, {
+  const response = await fetch(`${API_BASE}/api/config/ytdlp-update`, {
     method: 'POST',
   });
   if (!response.ok) throw new Error('Failed to update yt-dlp');
