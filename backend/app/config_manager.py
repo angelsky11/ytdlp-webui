@@ -234,7 +234,7 @@ def download_ffmpeg() -> dict:
             success = download_and_extract_tarxz(
                 url, ffmpeg_dir,
                 target_filename="ffmpeg",
-                filter_func=lambda x: 'ffmpeg' in x and '/' not in x.replace('ffmpeg', '')
+                filter_func=lambda x: x.endswith('/ffmpeg') and os.path.basename(os.path.dirname(x)) != 'logs'
             )
         
         if success:
