@@ -10,7 +10,7 @@ build/
 
 # Config and data (runtime generated)
 config/
-downloads/
+!config/config-template.json
 
 # Environment files
 .env
