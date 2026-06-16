@@ -19,6 +19,8 @@ COPY backend/app/ ./app/
 
 COPY --from=frontend-builder /app/frontend/dist/ ./frontend/dist/
 
+COPY config/config-template.json ./config/config-template.json
+
 RUN mkdir -p /app/downloads /app/config
 
 ENV PYTHONPATH=/app
