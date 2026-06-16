@@ -180,15 +180,32 @@ def ffmpeg_installed() -> bool:
     
     # Then check local ffmpeg installation
     if os.path.exists(ffmpeg_path):
+        # Check if it's a directory (extraction may create subdirectory)
+        if os.path.isdir(ffmpeg_path):
+            # Try to find ffmpeg executable inside the directory
+            actual_ffmpeg = os.path.join(ffmpeg_path, "ffmpeg") if platform.system() != "Windows" else os.path.join(ffmpeg_path, "ffmpeg.exe")
+            if os.path.isfile(actual_ffmpeg):
+                ffmpeg_path = actual_ffmpeg
+            else:
+                # Directory exists but no ffmpeg executable inside
+                app_logger.warning(f"ffmpeg directory exists but no executable found, removing: {get_ffmpeg_path()}")
+                import shutil
+                shutil.rmtree(get_ffmpeg_path())
+                return False
+        
         try:
             result = subprocess.run([ffmpeg_path, "-version"], capture_output=True, check=True)
             if result.returncode == 0:
                 return True
         except Exception:
-            # ffmpeg exists but can't run (e.g., wrong architecture)
+            # ffmpeg exists but can't run (e.g., wrong architecture, permission denied)
             # Remove broken installation so it can be re-downloaded
             app_logger.warning(f"ffmpeg exists but not executable, removing: {ffmpeg_path}")
-            os.remove(ffmpeg_path)
+            if os.path.isdir(ffmpeg_path):
+                import shutil
+                shutil.rmtree(ffmpeg_path)
+            else:
+                os.remove(ffmpeg_path)
     
     return False
 
