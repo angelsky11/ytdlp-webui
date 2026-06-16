@@ -185,7 +185,7 @@ export async function updateConfig(config: UpdateConfigRequest): Promise<AppConf
       };
   }
   
-  const response = await fetch(`${API_BASE}/config`, {
+  const response = await fetch(`${API_BASE}/api/config`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(config),
