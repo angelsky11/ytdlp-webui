@@ -9,11 +9,13 @@ from app.config import CONFIG_DIR, DOWNLOAD_DIR, BASE_DIR
 from app.utils.download import download_executable, download_and_extract_zip, download_and_extract_tarxz
 
 class AppConfig(BaseModel):
-    default_format: str = "mp4"
-    ytdlp_version: str = "stable"
-    cookies_enabled: bool = True
-    log_level: str = "info"
-    language: str = "en"
+    # 字段类型定义，但不设置默认值
+    # 默认值统一从模板文件读取
+    default_format: str
+    ytdlp_version: str
+    cookies_enabled: bool
+    log_level: str
+    language: str
 
 def get_logs_dir():
     """Get logs directory"""
@@ -72,18 +74,10 @@ def init_database_from_template() -> None:
 
 def load_config() -> AppConfig:
     """Load configuration from file"""
-    if os.path.exists(CONFIG_FILE):
-        try:
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return AppConfig(**data)
-        except Exception as e:
-            try:
-                from app.logger import app_logger
-                app_logger.error(f"Failed to parse config.json: {e}")
-            except ImportError:
-                pass
-    return AppConfig()
+    # 配置文件应该已经通过 init_config_from_template() 创建
+    with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        return AppConfig(**data)
 
 def save_config(config: AppConfig) -> None:
     """Save configuration to file"""
