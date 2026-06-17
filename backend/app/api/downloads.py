@@ -12,7 +12,7 @@ router = APIRouter(prefix="/downloads", tags=["downloads"])
 
 
 @router.post("", response_model=DownloadProgress)
-async def create_download(request: DownloadRequest, background_tasks: BackgroundTasks):
+async def create_download(request: DownloadRequest):
     app_logger.info("="*60)
     app_logger.info("API: POST /downloads")
     app_logger.info(f"Request: {request}")
@@ -29,9 +29,9 @@ async def create_download(request: DownloadRequest, background_tasks: Background
     
     app_logger.info(f"Task created with id: {task_id}")
     
-    # Add download task to background
-    background_tasks.add_task(download_manager.start_download, task_id)
-    app_logger.info(f"Download task scheduled for background execution")
+    # 任务已通过队列自动调度，无需手动启动
+    queue_status = download_manager.get_queue_status()
+    app_logger.info(f"Download task added to queue, queue length: {queue_status['queue_length']}, is_downloading: {queue_status['is_downloading']}")
     
     task = download_manager.get_task(task_id)
     progress = task.to_progress() if task else None
@@ -81,7 +81,7 @@ async def remove_download(task_id: str):
 
 
 @router.post("/{task_id}/restart")
-async def restart_download(task_id: str, background_tasks: BackgroundTasks):
+async def restart_download(task_id: str):
     """重新启动已失败/已取消的任务"""
     app_logger.info(f"API: POST /downloads/{task_id}/restart")
     
@@ -90,9 +90,12 @@ async def restart_download(task_id: str, background_tasks: BackgroundTasks):
         app_logger.warn(f"Failed to restart task {task_id}")
         raise HTTPException(status_code=400, detail="Failed to restart task")
     
-    # 添加到后台任务队列
-    background_tasks.add_task(download_manager.start_download, task_id)
-    app_logger.info(f"Restart task scheduled for background execution")
+    # 将任务加入下载队列
+    download_manager._download_queue.append(task_id)
+    app_logger.info(f"Restart task added to download queue")
+    
+    # 触发队列处理
+    await download_manager._process_download_queue()
     
     task = download_manager.get_task(task_id)
     progress = task.to_progress() if task else None

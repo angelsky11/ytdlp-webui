@@ -315,6 +315,8 @@ class DownloadManager:
     def __init__(self):
         self.tasks: dict[str, DownloadTask] = {}
         self.progress_callbacks: list[Callable] = []
+        self._download_queue: list[str] = []  # 下载等待队列（任务ID列表）
+        self._is_downloading = False  # 是否正在下载
         self._load_tasks_from_db()
         app_logger.info(f"DownloadManager initialized with {len(self.tasks)} tasks from DB")
 
@@ -419,10 +421,16 @@ class DownloadManager:
         self.tasks[task_id] = task
         self._save_task_to_db(task)
         
+        # 将任务加入下载队列
+        self._download_queue.append(task_id)
         app_logger.info(
-            f"Task created: id={task_id}, url={url}, title={title}, audio_only={audio_only}, "
-            f"format={options['format']}, video_format_id={video_format_id}"
+            f"Task created and enqueued: id={task_id}, url={url}, title={title}, audio_only={audio_only}, "
+            f"format={options['format']}, video_format_id={video_format_id}, queue_position={len(self._download_queue)}"
         )
+        
+        # 触发队列处理（在后台运行）
+        asyncio.create_task(self._process_download_queue())
+        
         return task_id
 
     async def _parse_progress_line(self, line: str, task: DownloadTask):
@@ -857,6 +865,61 @@ class DownloadManager:
             db.close()
         
         return history
+
+    async def _process_download_queue(self):
+        """处理下载队列，一次只执行一个任务，间隔 10 秒"""
+        # 防止重复处理
+        if self._is_downloading:
+            app_logger.debug("Download queue processing skipped: already downloading")
+            return
+        
+        if not self._download_queue:
+            app_logger.debug("Download queue is empty")
+            return
+        
+        # 获取队列中的第一个任务
+        task_id = self._download_queue.pop(0)
+        task = self.tasks.get(task_id)
+        
+        if not task:
+            app_logger.warning(f"Task {task_id} not found in tasks dict, skipping")
+            await self._process_download_queue()
+            return
+        
+        if task.status not in [DownloadStatus.PENDING, DownloadStatus.FAILED, DownloadStatus.CANCELLED]:
+            app_logger.debug(f"Task {task_id} is not in pending/failed/cancelled state ({task.status}), skipping")
+            await self._process_download_queue()
+            return
+        
+        # 如果是失败/取消的任务，重新设置状态
+        if task.status in [DownloadStatus.FAILED, DownloadStatus.CANCELLED]:
+            task.status = DownloadStatus.PENDING
+            task.progress = 0.0
+            task.error = None
+            self._save_task_to_db(task)
+            await self.notify_progress(task)
+        
+        self._is_downloading = True
+        app_logger.info(f"Starting download from queue: {task_id}, queue remaining: {len(self._download_queue)}")
+        
+        try:
+            await self.start_download(task_id)
+        finally:
+            self._is_downloading = False
+            # 如果队列中还有任务，延迟 10 秒后启动下一个
+            if self._download_queue:
+                app_logger.info(f"Waiting 10 seconds before next download...")
+                await asyncio.sleep(10)
+            # 继续处理队列
+            await self._process_download_queue()
+
+    def get_queue_status(self):
+        """获取队列状态（用于前端显示）"""
+        return {
+            'queue_length': len(self._download_queue),
+            'is_downloading': self._is_downloading,
+            'pending_tasks': [t.task_id for t in self.tasks.values() if t.status == DownloadStatus.PENDING]
+        }
 
 
 download_manager = DownloadManager()
