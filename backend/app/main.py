@@ -18,13 +18,9 @@ _INITIALIZED = False
 from app.config_manager import init_config_from_template, init_database_from_template
 
 if not _INITIALIZED:
-    app_logger.info("Initializing config from template...")
-    init_config_from_template()
-
-    app_logger.info("Initializing database from template...")
-    init_database_from_template()
-    
     _INITIALIZED = True
+    init_config_from_template()
+    init_database_from_template()
 
 # 导入 API 路由
 from app.api import downloads, files, config
@@ -141,7 +137,12 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     app_logger.error(f"HTTP Exception: {exc.status_code} - {exc.detail}")
     app_logger.error(f"Request URL: {request.url}")
     app_logger.error(f"Request method: {request.method}")
-    raise exc
+    # 使用 JSONResponse 返回正确的 HTTP 状态码和详情
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 @app.exception_handler(RequestValidationError)
@@ -150,8 +151,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     app_logger.error(f"Validation Error: {exc.errors()}")
     app_logger.error(f"Request URL: {request.url}")
     app_logger.error(f"Request method: {request.method}")
-    app_logger.error(f"Body: {await request.body()}")
-    raise exc
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
 
 
 if __name__ == "__main__":

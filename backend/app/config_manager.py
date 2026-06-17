@@ -52,6 +52,7 @@ def get_cookies_dir():
 
 def init_config_from_template() -> None:
     """Initialize config.json from template if it doesn't exist"""
+    # 函数内部已通过文件存在性检查防止重复创建
     if not os.path.exists(CONFIG_FILE):
         os.makedirs(CONFIG_DIR, exist_ok=True)
         shutil.copy(CONFIG_TEMPLATE_FILE, CONFIG_FILE)
@@ -63,6 +64,7 @@ def init_config_from_template() -> None:
 
 def init_database_from_template() -> None:
     """Initialize database.db from template if it doesn't exist"""
+    # 函数内部已通过文件存在性检查防止重复创建
     if not os.path.exists(DATABASE_FILE):
         os.makedirs(CONFIG_DIR, exist_ok=True)
         shutil.copy(DATABASE_TEMPLATE_FILE, DATABASE_FILE)
