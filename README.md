@@ -4,7 +4,7 @@
 
 A modern web interface for downloading videos from YouTube and other platforms using [yt-dlp](https://github.com/yt-dlp/yt-dlp). Built with React and Python FastAPI, featuring real-time progress tracking, multi-language support, and a clean responsive UI.
 
-![Version](https://img.shields.io/badge/version-0.0.1--alpha-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Tech Stack](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![Tech Stack](https://img.shields.io/badge/Python-FastAPI-009688?logo=fastapi)
 ![License](https://img.shields.io/badge/license-MIT-green)
