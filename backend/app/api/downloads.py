@@ -172,7 +172,7 @@ async def get_video_info(request: DownloadRequest):
             
             # 检测登录验证错误
             if "Sign in to confirm you're not a bot" in stderr_str or "cookies" in stderr_str.lower():
-                error_detail = "需要验证身份，请在设置页面上传 cookies 文件后重试。"
+                error_detail = "cookies_required"
             else:
                 error_detail = f"Failed to get video info: {stderr_str[:200]}"
             

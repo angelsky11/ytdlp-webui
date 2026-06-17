@@ -69,7 +69,17 @@ export function DownloadForm() {
       } catch (error) {
         log.error('Failed to fetch video info:', error);
         // 显示后端返回的具体错误消息，如果没有则显示默认消息
-        const errorMessage = error instanceof Error ? error.message : t('home.failedFetchInfo');
+        let errorMessage: string;
+        if (error instanceof Error) {
+          // 检查是否是特定的错误代码
+          if (error.message === 'cookies_required') {
+            errorMessage = t('home.cookiesRequired');
+          } else {
+            errorMessage = error.message;
+          }
+        } else {
+          errorMessage = t('home.failedFetchInfo');
+        }
         message.error(errorMessage);
         setModalVisible(false);
         log.info('Modal state: visible=false (closed due to error)');

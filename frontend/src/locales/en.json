@@ -33,7 +33,8 @@
     "videoStarted": "Video download started",
     "failedFetchInfo": "Failed to fetch video info",
     "failedStart": "Failed to start download",
-    "pleaseSelectFormat": "Please select a format"
+    "pleaseSelectFormat": "Please select a format",
+    "cookiesRequired": "Authentication required. Please upload cookies file in settings and try again."
   },
   "tasks": {
     "title": "Download Tasks",
@@ -114,7 +115,6 @@
     "clearAll": "Clear All",
     "clearAllConfirm": "Clear all log files?",
     "noLogFiles": "No log files",
-    "loading": "Loading...",
     "saveSettings": "Save Settings",
     "saved": "Settings saved successfully",
     "saveFailed": "Failed to save settings",

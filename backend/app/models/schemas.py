@@ -55,6 +55,6 @@ class VideoFormat(BaseModel):
 class VideoInfo(BaseModel):
     title: str
     thumbnail: Optional[str] = None
-    duration: Optional[int] = None
+    duration: Optional[float] = None
     uploader: Optional[str] = None
     formats: list[VideoFormat] = []

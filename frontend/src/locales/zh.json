@@ -33,7 +33,8 @@
     "videoStarted": "视频下载已开始",
     "failedFetchInfo": "获取视频信息失败",
     "failedStart": "开始下载失败",
-    "pleaseSelectFormat": "请选择视频格式"
+    "pleaseSelectFormat": "请选择视频格式",
+    "cookiesRequired": "需要验证身份，请在设置页面上传 cookies 文件后重试。"
   },
   "tasks": {
     "title": "下载任务",
