@@ -19,8 +19,10 @@ COPY backend/app/ ./app/
 
 COPY --from=frontend-builder /app/frontend/dist/ ./frontend/dist/
 
-COPY config/config-template.json ./config/config-template.json
-COPY config/database-template.db ./config/database-template.db
+# Template files are in project root, not in config directory
+# This allows config directory to be mounted without losing templates
+COPY config-template.json ./config-template.json
+COPY database-template.db ./database-template.db
 
 RUN mkdir -p /app/downloads /app/config
 

@@ -10,8 +10,8 @@ build/
 
 # Config and data (runtime generated)
 config/
-!config/config-template.json
-!config/database-template.db
+# Template files are now in project root, not in config directory
+# config-template.json and database-template.db are tracked at root level
 
 # Environment files
 .env

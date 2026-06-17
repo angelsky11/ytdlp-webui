@@ -5,7 +5,7 @@ import subprocess
 import platform
 from typing import Optional, List
 from pydantic import BaseModel
-from app.config import CONFIG_DIR, DOWNLOAD_DIR
+from app.config import CONFIG_DIR, DOWNLOAD_DIR, BASE_DIR
 from app.utils.download import download_executable, download_and_extract_zip, download_and_extract_tarxz
 
 class AppConfig(BaseModel):
@@ -23,9 +23,11 @@ def get_logs_dir():
 
 LOGS_DIR = get_logs_dir()
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
-CONFIG_TEMPLATE_FILE = os.path.join(CONFIG_DIR, "config-template.json")
+# Template files are in project root (BASE_DIR), not in config directory
+# This allows config directory to be mounted without losing templates
+CONFIG_TEMPLATE_FILE = os.path.join(BASE_DIR, "config-template.json")
 DATABASE_FILE = os.path.join(CONFIG_DIR, "database.db")
-DATABASE_TEMPLATE_FILE = os.path.join(CONFIG_DIR, "database-template.db")
+DATABASE_TEMPLATE_FILE = os.path.join(BASE_DIR, "database-template.db")
 
 def get_ytdlp_dir():
     return os.path.join(CONFIG_DIR, "ytdlp")
