@@ -169,7 +169,14 @@ async def get_video_info(request: DownloadRequest):
         if process.returncode != 0:
             app_logger.error(f"yt-dlp failed with code {process.returncode}")
             app_logger.error(f"stderr: {stderr_str[:500]}")
-            raise HTTPException(status_code=400, detail=f"Failed to get video info: {stderr_str[:200]}")
+            
+            # 检测登录验证错误
+            if "Sign in to confirm you're not a bot" in stderr_str or "cookies" in stderr_str.lower():
+                error_detail = "需要验证身份，请在设置页面上传 cookies 文件后重试。"
+            else:
+                error_detail = f"Failed to get video info: {stderr_str[:200]}"
+            
+            raise HTTPException(status_code=400, detail=error_detail)
         
         # 解析 JSON 输出
         if not stdout_str:

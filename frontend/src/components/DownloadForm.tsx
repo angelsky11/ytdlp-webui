@@ -68,7 +68,9 @@ export function DownloadForm() {
         }
       } catch (error) {
         log.error('Failed to fetch video info:', error);
-        message.error(t('home.failedFetchInfo'));
+        // 显示后端返回的具体错误消息，如果没有则显示默认消息
+        const errorMessage = error instanceof Error ? error.message : t('home.failedFetchInfo');
+        message.error(errorMessage);
         setModalVisible(false);
         log.info('Modal state: visible=false (closed due to error)');
       } finally {
