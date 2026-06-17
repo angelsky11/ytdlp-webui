@@ -154,7 +154,6 @@
       "部署：Docker / Docker Compose，支持 Windows、Linux 和 macOS"
     ],
     "version": "版本 {version}",
-    "versionNumber": "0.0.1-alpha",
     "github": "GitHub",
     "telegram": "Telegram",
     "telegramLink": "https://t.me/angelsky11",

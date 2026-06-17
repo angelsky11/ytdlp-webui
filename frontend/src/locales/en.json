@@ -154,7 +154,6 @@
       "Deployment: Docker / Docker Compose, supports Windows, Linux and macOS"
     ],
     "version": "Version {version}",
-    "versionNumber": "0.0.1-alpha",
     "github": "GitHub",
     "telegram": "Telegram",
     "telegramLink": "https://t.me/angelsky11",

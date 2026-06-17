@@ -4,7 +4,7 @@
 
 基于 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 的现代化 Web 界面，用于从 YouTube 及其他平台下载视频。采用 React + Python FastAPI 构建，支持实时进度追踪、多语言界面和简洁的响应式 UI。
 
-![Version](https://img.shields.io/badge/version-0.0.1--alpha-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Tech Stack](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![Tech Stack](https://img.shields.io/badge/Python-FastAPI-009688?logo=fastapi)
 ![License](https://img.shields.io/badge/license-MIT-green)
